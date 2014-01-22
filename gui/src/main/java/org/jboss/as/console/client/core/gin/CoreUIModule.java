@@ -34,8 +34,8 @@ import org.jboss.as.console.client.administration.AdministrationPresenter;
 import org.jboss.as.console.client.administration.AdministrationView;
 import org.jboss.as.console.client.administration.audit.AuditLogPresenter;
 import org.jboss.as.console.client.administration.audit.AuditLogView;
-import org.jboss.as.console.client.administration.role.ui.RoleAssignementView;
 import org.jboss.as.console.client.administration.role.RoleAssignmentPresenter;
+import org.jboss.as.console.client.administration.role.ui.RoleAssignementView;
 import org.jboss.as.console.client.analytics.AnalyticsProvider;
 import org.jboss.as.console.client.analytics.NavigationTracker;
 import org.jboss.as.console.client.auth.CurrentUser;
@@ -100,6 +100,8 @@ import org.jboss.as.console.client.rbac.SecurityFrameworkImpl;
 import org.jboss.as.console.client.rbac.UnauthorisedPresenter;
 import org.jboss.as.console.client.rbac.UnauthorisedView;
 import org.jboss.as.console.client.search.Harvest;
+import org.jboss.as.console.client.search.Index;
+import org.jboss.as.console.client.search.IndexProvider;
 import org.jboss.as.console.client.shared.DialogPresenter;
 import org.jboss.as.console.client.shared.DialogView;
 import org.jboss.as.console.client.shared.DialogViewImpl;
@@ -254,6 +256,7 @@ public class CoreUIModule extends AbstractPresenterModule {
         requestStaticInjection(Baseadress.class);
 
         bind(Harvest.class).in(Singleton.class);
+        bind(Index.class).toProvider(IndexProvider.class).in(Singleton.class);
 
         // main layout
         bind(Header.class).in(Singleton.class);
