@@ -91,6 +91,8 @@ import org.jboss.as.console.client.plugins.AccessControlRegistry;
 import org.jboss.as.console.client.plugins.AccessControlRegistryImpl;
 import org.jboss.as.console.client.plugins.RuntimeExtensionRegistry;
 import org.jboss.as.console.client.plugins.RuntimeLHSItemExtensionRegistryImpl;
+import org.jboss.as.console.client.plugins.SearchIndexRegistry;
+import org.jboss.as.console.client.plugins.SearchIndexRegistryImpl;
 import org.jboss.as.console.client.plugins.SubsystemRegistry;
 import org.jboss.as.console.client.plugins.SubsystemRegistryImpl;
 import org.jboss.as.console.client.rbac.HostManagementGatekeeper;
@@ -701,6 +703,8 @@ public class CoreUIModule extends AbstractPresenterModule {
         bind(SampleRepository.class).in(Singleton.class);
 
         bind(AccessControlRegistry.class).to(AccessControlRegistryImpl.class).in(Singleton.class);
+
+        bind(SearchIndexRegistry.class).to(SearchIndexRegistryImpl.class).in(Singleton.class);
 
         bind(SecurityFramework.class).to(SecurityFrameworkImpl.class).in(Singleton.class);
 

@@ -63,6 +63,7 @@ import org.jboss.as.console.client.shared.util.DMRUtil;
 import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
 import org.jboss.as.console.client.widgets.forms.PropertyBinding;
 import org.jboss.as.console.spi.AccessControl;
+import org.jboss.as.console.spi.SearchIndex;
 import org.jboss.ballroom.client.widgets.window.DefaultWindow;
 import org.jboss.dmr.client.ModelDescriptionConstants;
 import org.jboss.dmr.client.ModelNode;
@@ -74,6 +75,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.jboss.as.console.spi.SearchIndex.OperationMode.DOMAIN;
 import static org.jboss.dmr.client.ModelDescriptionConstants.*;
 
 /**
@@ -102,6 +104,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
     @ProxyCodeSplit
     @NameToken(NameTokens.ServerPresenter)
+    @SearchIndex(scope = DOMAIN)
     @AccessControl(resources = {
             "/{selected.host}/server-config=*",
             "opt://{selected.host}/server-config=*/system-property=*"

@@ -18,6 +18,14 @@
  */
 package org.jboss.as.console.client.standalone.deployment;
 
+import static org.jboss.as.console.spi.SearchIndex.OperationMode.STANDALONE;
+import static org.jboss.dmr.client.ModelDescriptionConstants.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -40,19 +48,13 @@ import org.jboss.as.console.client.shared.deployment.NewDeploymentWizard;
 import org.jboss.as.console.client.shared.deployment.model.DeploymentRecord;
 import org.jboss.as.console.client.standalone.runtime.StandaloneRuntimePresenter;
 import org.jboss.as.console.spi.AccessControl;
+import org.jboss.as.console.spi.SearchIndex;
 import org.jboss.ballroom.client.widgets.window.DefaultWindow;
 import org.jboss.ballroom.client.widgets.window.Feedback;
 import org.jboss.dmr.client.ModelNode;
 import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.impl.DMRAction;
 import org.jboss.dmr.client.dispatch.impl.DMRResponse;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-
-import static org.jboss.dmr.client.ModelDescriptionConstants.*;
 
 /**
  * @author Harald Pehl
@@ -64,6 +66,7 @@ public class StandaloneDeploymentPresenter
 {
     @ProxyCodeSplit
     @NameToken(NameTokens.DeploymentBrowserPresenter)
+    @SearchIndex(scope = STANDALONE)
     @AccessControl(resources = {
             "/deployment=*"
     }, recursive = false)
