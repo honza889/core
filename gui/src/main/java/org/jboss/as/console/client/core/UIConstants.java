@@ -54,8 +54,6 @@ public interface UIConstants extends Constants {
 
     String common_label_runtimeStatus();
 
-    String common_label_search();
-
     String common_label_serverInstances();
 
     String common_label_serverGroup();
@@ -1001,4 +999,10 @@ public interface UIConstants extends Constants {
     String unauthorized();
 
     String unauthorized_desc();
+
+    String search_placeholder();
+
+    String search_tooltip_osx();
+
+    String search_tooltip_other();
 }
