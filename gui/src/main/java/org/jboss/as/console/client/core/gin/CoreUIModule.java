@@ -30,6 +30,7 @@ import com.gwtplatform.mvp.client.googleanalytics.GoogleAnalytics;
 import com.gwtplatform.mvp.client.proxy.Gatekeeper;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.TokenFormatter;
+
 import org.jboss.as.console.client.administration.AdministrationPresenter;
 import org.jboss.as.console.client.administration.AdministrationView;
 import org.jboss.as.console.client.administration.audit.AuditLogPresenter;
@@ -178,6 +179,8 @@ import org.jboss.as.console.client.shared.subsys.jmx.JMXPresenter;
 import org.jboss.as.console.client.shared.subsys.jmx.JMXSubsystemView;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaPresenter;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaView;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.SubsystemPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.SubsystemView;
 import org.jboss.as.console.client.shared.subsys.logging.HandlerListManager;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingPresenter;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingView;
@@ -708,6 +711,13 @@ public class CoreUIModule extends AbstractPresenterModule {
                         DialogView.class,
                         DialogViewImpl.class,
                         DialogPresenter.MyProxy.class);
+        
+        // JSM Policy
+        bindPresenter(SubsystemPresenter.class,
+                SubsystemPresenter.MyView.class,
+                SubsystemView.class,
+                SubsystemPresenter.MyProxy.class);
+        
     }
 }
 

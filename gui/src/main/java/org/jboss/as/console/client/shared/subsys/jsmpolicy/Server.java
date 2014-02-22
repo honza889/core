@@ -1,4 +1,4 @@
-package org.picketbox.jsmpolicy.console.client.jsmpolicy;
+package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
 import org.jboss.as.console.client.shared.viewframework.NamedEntity;
 import org.jboss.as.console.client.widgets.forms.Address;
@@ -7,7 +7,7 @@ import org.jboss.as.console.client.widgets.forms.Binding;
 @Address("/subsystem=jsmpolicy/server={0}")
 public interface Server extends NamedEntity {
 	
-	@Binding(detypedName="alias", key = true)
+	@Binding(detypedName="name", key = true)
 	String getName();
 	void setName(String alias);
 	

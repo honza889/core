@@ -27,6 +27,7 @@ import com.gwtplatform.mvp.client.googleanalytics.GoogleAnalytics;
 import com.gwtplatform.mvp.client.proxy.Gatekeeper;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.TokenFormatter;
+
 import org.jboss.as.console.client.administration.AdministrationPresenter;
 import org.jboss.as.console.client.administration.audit.AuditLogPresenter;
 import org.jboss.as.console.client.administration.role.RoleAssignmentPresenter;
@@ -109,6 +110,7 @@ import org.jboss.as.console.client.shared.subsys.jca.model.StandaloneDriverStrat
 import org.jboss.as.console.client.shared.subsys.jgroups.JGroupsPresenter;
 import org.jboss.as.console.client.shared.subsys.jmx.JMXPresenter;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.SubsystemPresenter;
 import org.jboss.as.console.client.shared.subsys.logging.HandlerListManager;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingPresenter;
 import org.jboss.as.console.client.shared.subsys.mail.MailPresenter;
@@ -344,4 +346,9 @@ public interface CoreUI {
     UnauthorisedPresenter getUnauthorisedPresenter();
 
     AsyncProvider<DialogPresenter> getDialogPresenter();
+    
+    
+    // JSM Policy
+    AsyncProvider<SubsystemPresenter> getSubsystemPresenter();
+    
 }
