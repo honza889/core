@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.as.console.client.Console;
+import org.jboss.as.console.client.domain.model.ServerGroupRecord;
+import org.jboss.as.console.client.domain.model.ServerGroupStore;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
@@ -31,6 +33,7 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.MyProxy> {
 	
 	private RevealStrategy revealStrategy;
+	private ServerGroupStore serverGroupStore;
 	
 	@ProxyCodeSplit
 	@NameToken("jsmpolicy")
@@ -47,13 +50,23 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	}
 	
 	@Inject
-	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy) {
+	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, ServerGroupStore serverGroupStore) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
+		this.serverGroupStore = serverGroupStore;
 	}
 	
 	protected void onReset() {
         super.onReset();
+        
+        serverGroupStore.loadServerGroups(new SimpleCallback<List<ServerGroupRecord>>() {
+            public void onSuccess(List<ServerGroupRecord> result) {
+                ((JsmView)getView()).setServerGroups(result);
+            }
+        });
+        
+        
+        
         getView().initialLoad();
     }
 	
