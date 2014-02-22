@@ -21,15 +21,15 @@ import org.jboss.dmr.client.ModelNode;
 import java.util.List;
 import java.util.Map;
 
-public class SubsystemView extends DisposableViewImpl implements SubsystemPresenter.MyView {
+public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
-    private SubsystemPresenter presenter;
-    private Form<Server> form;
+    private JsmPresenter presenter;
+    private Form<JsmServer> form;
 
     @Override
     public Widget createWidget() {
 
-        form = new Form<Server>(Server.class);
+        form = new Form<JsmServer>(JsmServer.class);
         form.setNumColumns(2);
 
         TextBoxItem defaultDs = new TextBoxItem("defaultDataSource", "Default Datasource", false);
@@ -46,14 +46,14 @@ public class SubsystemView extends DisposableViewImpl implements SubsystemPresen
         form.setFields(defaultDs, inheritance);
         form.setEnabled(false);
         
-        FormToolStrip<Server> formToolStrip = new FormToolStrip<Server>(
-                form, new FormToolStrip.FormCallback<Server>() {
+        FormToolStrip<JsmServer> formToolStrip = new FormToolStrip<JsmServer>(
+                form, new FormToolStrip.FormCallback<JsmServer>() {
             @Override
             public void onSave(Map<String, Object> changeset) {
                 presenter.onSave(form.getEditedEntity(), changeset);
             }
             @Override
-            public void onDelete(Server entity) {
+            public void onDelete(JsmServer entity) {
                 // cannot be removed
             }
         });
@@ -73,7 +73,7 @@ public class SubsystemView extends DisposableViewImpl implements SubsystemPresen
                 .setHelp(helpPanel).build();
 
         Widget panel = new OneToOneLayout()
-                .setTitle("JSM")
+                .setTitle("JSM Policies")
                 .setHeadline("JSM Policy Subsystem")
                 .setDescription(Console.CONSTANTS.subsys_jpa_desc())
                 .setMaster("Details", detail)
@@ -84,11 +84,11 @@ public class SubsystemView extends DisposableViewImpl implements SubsystemPresen
         return panel;
     }
 
-    public void setPresenter(SubsystemPresenter presenter) {
+    public void setPresenter(JsmPresenter presenter) {
         this.presenter = presenter;
     }
 
-    public void updateFrom(Server s) {
+    public void updateFrom(JsmServer s) {
         form.edit(s);
     }
 

@@ -179,8 +179,8 @@ import org.jboss.as.console.client.shared.subsys.jmx.JMXPresenter;
 import org.jboss.as.console.client.shared.subsys.jmx.JMXSubsystemView;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaPresenter;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaView;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.SubsystemPresenter;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.SubsystemView;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.JsmPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.JsmView;
 import org.jboss.as.console.client.shared.subsys.logging.HandlerListManager;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingPresenter;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingView;
@@ -713,10 +713,10 @@ public class CoreUIModule extends AbstractPresenterModule {
                         DialogPresenter.MyProxy.class);
         
         // JSM Policy
-        bindPresenter(SubsystemPresenter.class,
-                SubsystemPresenter.MyView.class,
-                SubsystemView.class,
-                SubsystemPresenter.MyProxy.class);
+        bindPresenter(JsmPresenter.class,
+                JsmPresenter.MyView.class,
+                JsmView.class,
+                JsmPresenter.MyProxy.class);
         
     }
 }

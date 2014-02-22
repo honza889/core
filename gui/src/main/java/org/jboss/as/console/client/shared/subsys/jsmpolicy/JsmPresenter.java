@@ -28,7 +28,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 
-public class SubsystemPresenter extends Presenter<SubsystemPresenter.MyView, SubsystemPresenter.MyProxy> {
+public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.MyProxy> {
 	
 	private RevealStrategy revealStrategy;
 	
@@ -37,9 +37,9 @@ public class SubsystemPresenter extends Presenter<SubsystemPresenter.MyView, Sub
 	@AccessControl(resources = {
             "{selected.profile}/subsystem=jsmpolicy"
     })
-	@SubsystemExtension(name = "JSM Policies", group = "JSM POLICY", key = "jsmpolicy")
+	@SubsystemExtension(name = "JSM Policies", group = "JSM Policy", key = "jsmpolicy")
 	//@RuntimeExtension(name="JSM POLICY", key="jsmpolicy")
-	public interface MyProxy extends Proxy<SubsystemPresenter>, Place {}
+	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
 	public interface MyView extends View, FrameworkView {
 		void setPresenter(MailPresenter presenter);
         void updateFrom(List<MailSession> list);
@@ -47,7 +47,7 @@ public class SubsystemPresenter extends Presenter<SubsystemPresenter.MyView, Sub
 	}
 	
 	@Inject
-	public SubsystemPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy) {
+	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
 	}
@@ -61,7 +61,7 @@ public class SubsystemPresenter extends Presenter<SubsystemPresenter.MyView, Sub
 		revealStrategy.revealInParent(this);
 	}
 
-	public void onSave(Server editedEntity, Map<String, Object> changeset) {
+	public void onSave(JsmServer editedEntity, Map<String, Object> changeset) {
 		/*
         ModelNode operation = adapter.fromChangeset(changeset, beanMetaData.getAddress().asResource(Baseadress.get()));
 

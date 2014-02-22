@@ -5,7 +5,7 @@ import org.jboss.as.console.client.widgets.forms.Address;
 import org.jboss.as.console.client.widgets.forms.Binding;
 
 @Address("/subsystem=jsmpolicy/server={0}")
-public interface Server extends NamedEntity {
+public interface JsmServer extends NamedEntity {
 	
 	@Binding(detypedName="name", key = true)
 	String getName();
