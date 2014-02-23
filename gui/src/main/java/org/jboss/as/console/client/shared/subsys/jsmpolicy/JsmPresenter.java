@@ -1,12 +1,16 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jboss.as.console.client.Console;
+import org.jboss.as.console.client.domain.model.HostInformationStore;
 import org.jboss.as.console.client.domain.model.ServerGroupRecord;
 import org.jboss.as.console.client.domain.model.ServerGroupStore;
+import org.jboss.as.console.client.domain.model.ServerInstance;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
+import org.jboss.as.console.client.domain.topology.HostInfo;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
 import org.jboss.as.console.client.shared.subsys.jpa.model.JpaSubsystem;
@@ -34,6 +38,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	
 	private RevealStrategy revealStrategy;
 	private ServerGroupStore serverGroupStore;
+	private HostInformationStore hostStore;
 	
 	@ProxyCodeSplit
 	@NameToken("jsmpolicy")
@@ -50,25 +55,53 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	}
 	
 	@Inject
-	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, ServerGroupStore serverGroupStore) {
+	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, ServerGroupStore serverGroupStore, HostInformationStore hostStore) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
 		this.serverGroupStore = serverGroupStore;
+		this.hostStore = hostStore;
 	}
 	
 	protected void onReset() {
         super.onReset();
         
-        serverGroupStore.loadServerGroups(new SimpleCallback<List<ServerGroupRecord>>() {
-            public void onSuccess(List<ServerGroupRecord> result) {
-                ((JsmView)getView()).setServerGroups(result);
-            }
-        });
-        
-        
+        loadServerGroups();
         
         getView().initialLoad();
     }
+	
+	private void loadServerGroups() {
+		try {
+	        hostStore.loadHostsAndServerInstances(new SimpleCallback<List<HostInfo>>() {
+				public void onSuccess(List<HostInfo> hosts) {
+					try {
+						Map<String,JsmNode> serverGroups = new HashMap<String,JsmNode>();
+						for (HostInfo host : hosts) {
+							for (ServerInstance instance : host.getServerInstances()){
+								String groupName = instance.getGroup();
+								String serverName = instance.getServer();
+								
+								if(serverGroups.containsKey(groupName)){
+									serverGroups.get(groupName).getNodes().add(new JsmNode(serverName, false));
+								}else{
+									JsmNode groupNode = new JsmNode(groupName, true);
+									groupNode.getNodes().add(new JsmNode(serverName, false));
+									serverGroups.put(groupName, groupNode);
+								}
+							}
+						}
+						((JsmView)getView()).setServerGroups(serverGroups);
+					}
+					catch(Exception e) {
+						Console.error("Exception after server groups loading", e.getMessage());
+					}
+				}
+			});
+		}
+		catch(Exception e) {
+			Console.error("Exception before server groups loading", e.getMessage());
+		}
+	}
 	
 	protected void revealInParent() {
 		revealStrategy.revealInParent(this);

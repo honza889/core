@@ -29,12 +29,10 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
     private JsmPresenter presenter;
     private Form<JsmServer> form;
-    private List<ServerGroupRecord> serverGroups;
+    private Map<String,JsmNode> serverGroups = null;
     
     @Override
     public Widget createWidget() {
-    	
-    	System.err.println("JSM POLICY JsmView.createWidget()");
     	
     	TreeViewModel model = new JsmTreeViewModel(serverGroups);
     	CellTree tree = new CellTree(model,"Domain");
@@ -95,11 +93,11 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 		
 	}
 
-	public List<ServerGroupRecord> getServerGroups() {
+	public Map<String,JsmNode> getServerGroups() {
 		return serverGroups;
 	}
 
-	public void setServerGroups(List<ServerGroupRecord> serverGroups) {
+	public void setServerGroups(Map<String,JsmNode> serverGroups) {
 		this.serverGroups = serverGroups;
 	}
 }
