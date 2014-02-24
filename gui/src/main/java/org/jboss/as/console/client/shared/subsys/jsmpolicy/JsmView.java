@@ -22,7 +22,7 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
     private CellTree tree;
     private OneToOneLayout panel;
     
-    private VerticalPanel container;
+    private VerticalPanel container = new VerticalPanel();
     
     @Override
     public Widget createWidget() {
@@ -31,23 +31,23 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
     	tree = new CellTree(model,"Domain");
     	tree.setStyleName("jndi-tree");
     	tree.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
-    	
+    	*/
     	panel = new OneToOneLayout()
 				.setTitle("JSM Policies")
 				.setHeadline("JSM Policy Subsystem")
 				.setDescription("This subsystem allow set policy used by Java Security Manager.")
-				.setMaster("Details", tree);
+				.setMaster("Servers by server group", container);
     	
 		return panel.build();
-    	*/
     	
+    	/*
     	RHSContentPanel layout = new RHSContentPanel(Console.CONSTANTS.subsys_naming_jndiView());
     	container = new VerticalPanel();
         container.setStyleName("fill-layout");
         layout.add(new ContentHeaderLabel(Console.CONSTANTS.subsys_naming_jndiBindings()));
         layout.add(container);
         return layout;
-        
+        */
     }
 
 	public void setServerGroups(Map<String,JsmNode> serverGroups) {
