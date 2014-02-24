@@ -6,24 +6,14 @@ import java.util.Map;
 
 import org.jboss.as.console.client.Console;
 import org.jboss.as.console.client.domain.model.HostInformationStore;
-import org.jboss.as.console.client.domain.model.ServerGroupRecord;
 import org.jboss.as.console.client.domain.model.ServerGroupStore;
 import org.jboss.as.console.client.domain.model.ServerInstance;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.domain.topology.HostInfo;
-import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
-import org.jboss.as.console.client.shared.subsys.jpa.model.JpaSubsystem;
-import org.jboss.as.console.client.shared.subsys.mail.MailPresenter;
-import org.jboss.as.console.client.shared.subsys.mail.MailSession;
 import org.jboss.as.console.client.shared.viewframework.FrameworkView;
-import org.jboss.as.console.spi.RuntimeExtension;
 import org.jboss.as.console.spi.SubsystemExtension;
 import org.jboss.as.console.spi.AccessControl;
-import org.jboss.dmr.client.ModelNode;
-import org.jboss.dmr.client.ModelType;
-import org.jboss.dmr.client.dispatch.impl.DMRAction;
-import org.jboss.dmr.client.dispatch.impl.DMRResponse;
 
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -49,9 +39,6 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	//@RuntimeExtension(name="JSM POLICY", key="jsmpolicy")
 	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
 	public interface MyView extends View, FrameworkView {
-		void setPresenter(MailPresenter presenter);
-        void updateFrom(List<MailSession> list);
-        void setSelectedSession(String selectedSession);
         void setServerGroups(Map<String,JsmNode> serverGroups);
 	}
 	
