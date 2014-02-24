@@ -52,6 +52,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 		void setPresenter(MailPresenter presenter);
         void updateFrom(List<MailSession> list);
         void setSelectedSession(String selectedSession);
+        void setServerGroups(Map<String,JsmNode> serverGroups);
 	}
 	
 	@Inject
@@ -90,7 +91,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 								}
 							}
 						}
-						((JsmView)getView()).setServerGroups(serverGroups);
+						getView().setServerGroups(serverGroups);
 					}
 					catch(Exception e) {
 						Console.error("Exception after server groups loading", e.getMessage());

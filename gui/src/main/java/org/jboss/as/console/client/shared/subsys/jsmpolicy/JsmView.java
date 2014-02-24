@@ -2,6 +2,8 @@ package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.cellview.client.HasKeyboardSelectionPolicy;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.TreeViewModel;
 
@@ -17,6 +19,8 @@ import org.jboss.as.console.client.layout.FormLayout;
 import org.jboss.as.console.client.layout.OneToOneLayout;
 import org.jboss.as.console.client.widgets.forms.BlankItem;
 import org.jboss.as.console.client.widgets.forms.FormToolStrip;
+import org.jboss.ballroom.client.layout.RHSContentPanel;
+import org.jboss.ballroom.client.widgets.ContentHeaderLabel;
 import org.jboss.ballroom.client.widgets.forms.ComboBoxItem;
 import org.jboss.ballroom.client.widgets.forms.Form;
 import org.jboss.ballroom.client.widgets.forms.TextBoxItem;
@@ -31,24 +35,53 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
     private Form<JsmServer> form;
     private Map<String,JsmNode> serverGroups = null;
     
+    private CellTree tree;
+    private OneToOneLayout panel;
+    
+    private VerticalPanel container;
+    
     @Override
     public Widget createWidget() {
-    	
-    	TreeViewModel model = new JsmTreeViewModel(serverGroups);
-    	CellTree tree = new CellTree(model,"Domain");
+    	/*
+		TreeViewModel model = new JsmTreeViewModel(serverGroups);
+    	tree = new CellTree(model,"Domain");
     	tree.setStyleName("jndi-tree");
     	tree.setKeyboardSelectionPolicy(HasKeyboardSelectionPolicy.KeyboardSelectionPolicy.ENABLED);
+    	
+    	panel = new OneToOneLayout()
+				.setTitle("JSM Policies")
+				.setHeadline("JSM Policy Subsystem")
+				.setDescription("This subsystem allow set policy used by Java Security Manager.")
+				.setMaster("Details", tree);
+    	
+		return panel.build();
+    	*/
+    	
+    	RHSContentPanel layout = new RHSContentPanel(Console.CONSTANTS.subsys_naming_jndiView());
+    	container = new VerticalPanel();
+        container.setStyleName("fill-layout");
+        layout.add(new ContentHeaderLabel(Console.CONSTANTS.subsys_naming_jndiBindings()));
+        layout.add(container);
+        return layout;
         
-        Widget panel = new OneToOneLayout()
-                .setTitle("JSM Policies")
-                .setHeadline("JSM Policy Subsystem")
-                .setDescription(Console.CONSTANTS.subsys_jpa_desc())
-                .setMaster("Details", tree)
-                .build();
-        
-        return panel;
     }
 
+	public void setServerGroups(Map<String,JsmNode> serverGroups) {
+		
+		this.serverGroups = serverGroups;
+		JsmTreeViewModel model = new JsmTreeViewModel(serverGroups);
+		tree = new CellTree(model,"Domain");
+		JsmTreeViewModel.runFinish();
+		
+		container.clear();
+		container.add(tree);
+		
+	}
+	
+	public void clearValues() {
+		container.clear();
+	}
+	
     public void setPresenter(JsmPresenter presenter) {
         this.presenter = presenter;
     }
@@ -97,7 +130,4 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 		return serverGroups;
 	}
 
-	public void setServerGroups(Map<String,JsmNode> serverGroups) {
-		this.serverGroups = serverGroups;
-	}
 }
