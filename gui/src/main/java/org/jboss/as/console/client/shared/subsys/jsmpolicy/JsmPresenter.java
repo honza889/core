@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.jboss.as.console.client.Console;
 import org.jboss.as.console.client.domain.model.HostInformationStore;
-import org.jboss.as.console.client.domain.model.ServerGroupStore;
 import org.jboss.as.console.client.domain.model.ServerInstance;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.domain.topology.HostInfo;
@@ -27,7 +26,6 @@ import com.gwtplatform.mvp.client.proxy.Proxy;
 public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.MyProxy> {
 	
 	private RevealStrategy revealStrategy;
-	private ServerGroupStore serverGroupStore;
 	private HostInformationStore hostStore;
 	
 	@ProxyCodeSplit
@@ -38,15 +36,14 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	@SubsystemExtension(name = "JSM Policies", group = "JSM Policy", key = "jsmpolicy")
 	//@RuntimeExtension(name="JSM POLICY", key="jsmpolicy")
 	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
-	public interface MyView extends View, FrameworkView {
+	public interface MyView extends View, FrameworkView { // TODO: remove FrameworkView?
         void setServerGroups(Map<String,JsmNode> serverGroups);
 	}
 	
 	@Inject
-	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, ServerGroupStore serverGroupStore, HostInformationStore hostStore) {
+	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
-		this.serverGroupStore = serverGroupStore;
 		this.hostStore = hostStore;
 	}
 	

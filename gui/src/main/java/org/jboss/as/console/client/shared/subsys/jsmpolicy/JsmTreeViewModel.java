@@ -2,8 +2,6 @@ package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
 import java.util.Map;
 
-import org.jboss.as.console.client.Console;
-
 import com.google.gwt.cell.client.AbstractCell;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
