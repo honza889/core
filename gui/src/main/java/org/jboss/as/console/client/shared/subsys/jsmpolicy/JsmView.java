@@ -14,6 +14,7 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
 	private Form<JsmServer> form;
 	private VerticalPanel container;
+	private Map<String,JsmNode> serverGroups;
 
     public Widget createWidget() {
 
@@ -31,7 +32,8 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
 	public void setServerGroups(Map<String,JsmNode> serverGroups) {
 
-		JsmTreeViewModel model = new JsmTreeViewModel(serverGroups);
+		this.serverGroups = serverGroups;
+	    JsmTreeViewModel model = new JsmTreeViewModel(serverGroups);
 		CellTree tree = new CellTree(model,"Domain");
 
 		JsmTreeViewModel.runFinish();
@@ -54,7 +56,7 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 	}
 
 	public void refresh() {
-		// TODO Auto-generated method stub
+		setServerGroups(serverGroups);
 	}
 
 	public void setEditingEnabled(boolean isEnabled) {

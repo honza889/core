@@ -1,7 +1,5 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.Command;
@@ -37,11 +35,7 @@ public class JsmTreeViewModel implements TreeViewModel {
             });
         }
 
-        List<String> options = new ArrayList<String>();
-        options.add("policy1");
-        options.add("policy2");
-        options.add("policy3");
-        return new DefaultNodeInfo<JsmNode>(dataProvider, new JsmNodeCell(options));
+        return new DefaultNodeInfo<JsmNode>(dataProvider, new JsmNodeCell(JsmNode.getPolicyPossibleValues()));
     }
 
     public boolean isLeaf(Object value) {

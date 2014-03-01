@@ -50,7 +50,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       String type = event.getType();
       if (BrowserEvents.CHANGE.equals(type)) {
         Object key = context.getKey();
-        SelectElement select = parent.getFirstChild().cast();
+        SelectElement select = parent.getChild(1).cast();
 
         value.setPolicy(options.get(select.getSelectedIndex()));
 
@@ -63,7 +63,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
     }
 
     public void render(Context context, JsmNode value, SafeHtmlBuilder sb) {
-      // Get the view data.
+
       Object key = context.getKey();
       JsmNode viewData = getViewData(key);
       if (viewData != null && viewData.equals(value)) {
@@ -89,10 +89,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
     }
 
     private int getSelectedIndex(JsmNode value) {
-      Integer index = indexForOption.get(value);
-      if (index == null) {
-        return -1;
-      }
-      return index.intValue();
+      Integer index = indexForOption.get(value.getPolicy());
+      return (index == null) ? -1 : index.intValue();
     }
 }
