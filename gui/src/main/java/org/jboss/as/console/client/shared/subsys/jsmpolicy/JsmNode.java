@@ -3,17 +3,15 @@ package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jboss.as.console.client.Console;
-
 public class JsmNode {
 	String name;
-	boolean group;
 	String policy = "init";
 	List<JsmNode> nodes = new ArrayList<JsmNode>();
+	JsmPresenter presenter;
 
-	public JsmNode(String name, boolean group){
+	public JsmNode(String name, JsmPresenter presenter){
 		this.name = name;
-		this.group = group;
+		this.presenter = presenter;
 	}
 
 	public String getName(){
@@ -24,17 +22,11 @@ public class JsmNode {
 		return nodes;
 	}
 
-	public boolean isGroup(){
-		return group;
-	}
-
 	public String getPolicy(){
 	    if(nodes.isEmpty()){ // server (empty groups are not here)
 	        return this.policy;
 	    }else{ // group
 	        JsmNode first = nodes.get(0);
-
-	        Console.error("firstValue("+first.name+")("+first.policy+")",first.toString());
 
 	        for(JsmNode subnode : nodes){
 	            if(!subnode.policy.equals(first.policy)){
@@ -56,15 +48,20 @@ public class JsmNode {
 	    return options;
 	}
 
+    public void initPolicy(String policy){
+        this.policy = policy;
+    }
+
 	public void setPolicy(String policy){
-
-	    Console.error(name+".setPolicy("+policy+")", this.toString());
-
 	    this.policy = policy;
-	    for(JsmNode subnode : nodes){
-	        subnode.setPolicy(policy);
+	    if(nodes.isEmpty()){ // server
+	        presenter.setServerPolicy(name, policy);
+	    }else{ // group
+	        // TODO: if policy!="" ?
+	        for(JsmNode subnode : nodes){
+	            subnode.setPolicy(policy);
+	        }
 	    }
-
 	}
 
 }
