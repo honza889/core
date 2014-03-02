@@ -216,4 +216,26 @@ public interface UIMessages extends Messages {
     String verify_datasource_successful_message(String datasource);
 
     String verify_datasource_failed_message(String datasource);
+
+    String patch_manager_rollback_body(String id);
+
+    String patch_manager_stop_server_body(String host);
+
+    String patch_manager_applying(String filename);
+
+    String patch_manager_restart_yes(String serverOrHost);
+
+    SafeHtml patch_manager_conflict_override_title();
+
+    SafeHtml patch_manager_desc_product();
+
+    String patch_manager_servers_still_running_warning();
+
+    String patch_manager_applying_patch_body(String filename);
+
+    String patch_manager_restart_needed(String serverOrHost);
+
+    String patch_manager_error_parse_result(String exception, String payload);
+
+    String patch_manager_rolling_back_body(String id);
 }

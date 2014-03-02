@@ -35,8 +35,8 @@ import org.jboss.as.console.client.administration.AdministrationPresenter;
 import org.jboss.as.console.client.administration.AdministrationView;
 import org.jboss.as.console.client.administration.audit.AuditLogPresenter;
 import org.jboss.as.console.client.administration.audit.AuditLogView;
-import org.jboss.as.console.client.administration.role.ui.RoleAssignementView;
 import org.jboss.as.console.client.administration.role.RoleAssignmentPresenter;
+import org.jboss.as.console.client.administration.role.ui.RoleAssignementView;
 import org.jboss.as.console.client.analytics.AnalyticsProvider;
 import org.jboss.as.console.client.analytics.NavigationTracker;
 import org.jboss.as.console.client.auth.CurrentUser;
@@ -117,6 +117,9 @@ import org.jboss.as.console.client.shared.general.SocketBindingView;
 import org.jboss.as.console.client.shared.help.HelpSystem;
 import org.jboss.as.console.client.shared.model.SubsystemStore;
 import org.jboss.as.console.client.shared.model.SubsystemStoreImpl;
+import org.jboss.as.console.client.shared.patching.PatchManager;
+import org.jboss.as.console.client.shared.patching.PatchManagerPresenter;
+import org.jboss.as.console.client.shared.patching.PatchManagerView;
 import org.jboss.as.console.client.shared.runtime.RuntimeBaseAddress;
 import org.jboss.as.console.client.shared.runtime.ds.DataSourceMetricPresenter;
 import org.jboss.as.console.client.shared.runtime.ds.DataSourceMetricView;
@@ -303,6 +306,7 @@ public class CoreUIModule extends AbstractPresenterModule {
         bind(ApplicationMetaData.class).in(Singleton.class);
 
         bind(DomainEntityManager.class).in(Singleton.class);
+        bind(PatchManager.class).in(Singleton.class);
 
         // sign in
         bindPresenter(SignInPagePresenter.class, SignInPagePresenter.MyView.class,
@@ -671,6 +675,11 @@ public class CoreUIModule extends AbstractPresenterModule {
                 EnvironmentPresenter.MyView.class,
                 EnvironmentView.class,
                 EnvironmentPresenter.MyProxy.class);
+
+        bindPresenter(PatchManagerPresenter.class,
+                PatchManagerPresenter.MyView.class,
+                PatchManagerView.class,
+                PatchManagerPresenter.MyProxy.class);
 
         // Administration
         bindPresenter(AdministrationPresenter.class,

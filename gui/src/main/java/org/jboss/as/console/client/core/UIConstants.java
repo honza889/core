@@ -1022,4 +1022,142 @@ public interface UIConstants extends Constants {
     String verify_datasource_no_running_servers();
 
     String verify_datasource_dependent_error();
+
+    String patch_manager_latest();
+
+    String patch_manager_apply_new();
+
+    String patch_manager_rollback();
+
+    String patch_manager_recently();
+
+    String patch_manager_error();
+
+    String patch_manager_stop_server_title();
+
+    String patch_manager_stop_server_yes();
+
+    String patch_manager_stop_server_no();
+
+    String patch_manager_select_patch_title();
+
+    String patch_manager_select_patch_body();
+
+    String patch_manager_stopping_servers_body();
+
+    String patch_manager_possible_actions();
+
+    String patch_manager_conflict_title();
+
+    String patch_manager_conflict_body();
+
+    String patch_manager_conflict_cancel_title();
+
+    String patch_manager_conflict_cancel_body();
+
+    String patch_manager_conflict_override_body();
+
+    String patch_manager_conflict_override_check();
+
+    String patch_manager_error_title();
+
+    String patch_manager_apply_error_body();
+
+    String patch_manager_apply_error_cancel_title();
+
+    String patch_manager_apply_error_cancel_body();
+
+    String patch_manager_apply_error_select_title();
+
+    String patch_manager_apply_error_select_body();
+
+    String patch_manager_show_details();
+
+    String patch_manager_hide_details();
+
+    String patch_manager_stop_server_error();
+
+    String patch_manager_stop_server_timeout();
+
+    String patch_manager_stop_server_unknown_error();
+
+    String patch_manager_stop_server_error_continue_title();
+
+    String patch_manager_stop_server_error_continue_body();
+
+    String patch_manager_stop_server_error_cancel_title();
+
+    String patch_manager_stop_server_error_cancel_body();
+
+    String patch_manager_select_file();
+
+    String patch_manager_restart_pending();
+
+    String patch_manager_restart_timeout();
+
+    String patch_manager_restart_error();
+
+    String patch_manager_desc_community();
+
+    String patch_manager_toolstrip_desc();
+
+    String patch_manager_patch_information();
+
+    String patch_manager_applied_at();
+
+    String patch_manager_apply_patch();
+
+    String patch_manager_apply_new_wizard_error();
+
+    String patch_manager_rollback_wizard_error();
+
+    String patch_manager_stop_server_question_for_apply();
+
+    String patch_manager_stop_server_question_for_rollback();
+
+    String patch_manager_servers_shutdown();
+
+    String patch_manager_select_patch_upload();
+
+    String patch_manager_confirm_patch_title();
+
+    String patch_manager_confirm_patch_body();
+
+    String patch_manager_update();
+
+    String patch_manager_restart_now();
+
+    String patch_manager_restart_no();
+
+    String patch_manager_applied_success();
+
+    String patch_manager_rollback_options_title();
+
+    String patch_manager_rollback_options_body();
+
+    String patch_manager_rollback_options_reset_configuration();
+
+    String patch_manager_rollback_options_reset_configuration_desc();
+
+    String patch_manager_rollback_options_override_all();
+
+    String patch_manager_rollback_options_override_all_desc();
+
+    String patch_manager_rollback_confirm_title();
+
+    String patch_manager_rollback_confirm_body();
+
+    String patch_manager_rolled_back_success_title();
+
+    String patch_manager_rolled_back_success_body();
+
+    String patch_manager_rollback_error_body();
+
+    String patch_manager_rollback_error_cancel_title();
+
+    String patch_manager_rollback_error_cancel_body();
+
+    String patch_manager_rollback_error_select_title();
+
+    String patch_manager_rollback_error_select_body();
 }

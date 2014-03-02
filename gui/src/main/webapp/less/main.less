@@ -1403,6 +1403,7 @@ input[disabled], select[disabled], textarea[disabled], input[readonly], select[r
 select, input[type="file"] {
   height: 28px;
   line-height: 28px;
+  width: inherit;
 }
 
 .radio input[type="radio"], .checkbox input[type="checkbox"] {
@@ -1524,6 +1525,12 @@ input[type="checkbox"] {
   background: -o-linear-gradient(top, @selection3-color, @selection4-color);
   color: #ffffff !important;
   border-color: @border4-color !important;
+
+  &:disabled {
+    color: #4e5156 !important;
+    background: fade(@selection3-color, 50%);
+    border: 1px solid #b9b9b9;
+  }
 }
 
 /*paged views*/
@@ -2515,3 +2522,82 @@ hr {
   height: 1px;
   width: 80%;
 }
+
+.hal-pending {
+  margin: 2em 0;
+  text-align: center;
+  .spinner, .title {
+    vertical-align: middle;
+  }
+  .title {
+    padding-left: 1em;
+  }
+}
+
+.success {
+  color: @success-color;
+}
+.error {
+  color: @error-color;
+}
+
+.restart-window-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.restart-error {
+  color: @error-color;
+  margin: 2em;
+  text-align: center;
+}
+
+.patch-radio {
+  display: block;
+  margin: 1em;
+  input[type=radio] {
+    width: inherit;
+    margin: 0 .5em;
+  }
+}
+
+.patch-followup-header {
+  margin-top: 2em;
+}
+
+ul.patch-actions {
+  list-style: none;
+  li {
+    margin-bottom: 1em;
+  }
+  .title {
+    font-weight: bold;
+  }
+  #patch-conflict-override, #select-different-patch, #choose-options {
+    margin-top: .5em;
+    input[type=checkbox] {
+      margin: 0 .5em 0 0;
+      padding: 0;
+    }
+    button {
+      margin: 0;
+    }
+  }
+}
+
+.patch-success-panel {
+  border: 1px solid @success-color;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding: 1em;
+}
+
+.patch-error-panel {
+  border: 1px solid @error-color;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  padding: 1em;
+}
+
