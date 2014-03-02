@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.jboss.as.console.client.core.DisposableViewImpl;
 import org.jboss.as.console.client.layout.OneToOneLayout;
-import org.jboss.ballroom.client.widgets.forms.Form;
 
 import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.VerticalPanel;
@@ -12,7 +11,6 @@ import com.google.gwt.user.client.ui.Widget;
 
 public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
-	private Form<JsmServer> form;
 	private VerticalPanel container;
 	private Map<String,JsmNode> serverGroups;
 
@@ -43,24 +41,8 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
 	}
 
-	public void clearValues() {
-		container.clear();
-	}
-
-    public void updateFrom(JsmServer s) {
-        form.edit(s);
-    }
-
-	public void initialLoad() {
-		// TODO Auto-generated method stub
-	}
-
 	public void refresh() {
 		setServerGroups(serverGroups);
-	}
-
-	public void setEditingEnabled(boolean isEnabled) {
-		// TODO Auto-generated method stub
 	}
 
 }

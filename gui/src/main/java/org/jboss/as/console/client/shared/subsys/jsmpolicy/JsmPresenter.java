@@ -20,9 +20,6 @@ import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.domain.topology.HostInfo;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
-import org.jboss.as.console.client.shared.viewframework.FrameworkView;
-import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
-import org.jboss.as.console.client.widgets.forms.EntityAdapter;
 import org.jboss.as.console.spi.AccessControl;
 import org.jboss.as.console.spi.SubsystemExtension;
 import org.jboss.dmr.client.ModelDescriptionConstants;
@@ -44,7 +41,6 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 
 	private RevealStrategy revealStrategy;
 	private HostInformationStore hostStore;
-	private final EntityAdapter<JsmServer> serverAdapter;
 	private DispatchAsync dispatcher;
 
 	@ProxyCodeSplit
@@ -53,27 +49,23 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
             "{selected.profile}/subsystem=jsmpolicy"
     })
 	@SubsystemExtension(name = "JSM Policies", group = "JSM Policy", key = "jsmpolicy")
-	//@RuntimeExtension(name="JSM POLICY", key="jsmpolicy")
 	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
-	public interface MyView extends View, FrameworkView { // TODO: remove FrameworkView?
+	public interface MyView extends View {
         void setServerGroups(Map<String,JsmNode> serverGroups);
+        void refresh();
 	}
 
 	@Inject
-	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, ApplicationMetaData metaData, DispatchAsync dispatcher) {
+	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
 		this.hostStore = hostStore;
 		this.dispatcher = dispatcher;
-		this.serverAdapter = new EntityAdapter<JsmServer>(JsmServer.class, metaData);
 	}
 
 	protected void onReset() {
         super.onReset();
-
         loadServerGroups();
-
-        getView().initialLoad();
     }
 
 	private void loadServerGroups() {
@@ -124,7 +116,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 			                getView().refresh();
 			            }
 			            public void onFailure(Throwable caught) {
-			                // server not defined
+			                // server not defined - policy will be null
 			                serverNode.initPolicy(null);
 			                getView().refresh();
 			            }
@@ -166,7 +158,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
                 operation.get(ADDRESS).add("server", server);
                 operation.get(NAME).set("policy");
                 if(policy==null){
-                    operation.get(OP).set("undefine-attribute"); // TODO: UNDEFINE_ATTRIBUTE_OPERATION
+                    operation.get(OP).set("undefine-attribute");
                 }else{
                     operation.get(OP).set(WRITE_ATTRIBUTE_OPERATION);
                     operation.get(VALUE).set(policy);
@@ -190,39 +182,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
         });
 	}
 
-
 	protected void revealInParent() {
 		revealStrategy.revealInParent(this);
 	}
-
-	public void onSave(JsmServer editedEntity, Map<String, Object> changeset) {
-		/*
-        ModelNode operation = adapter.fromChangeset(changeset, beanMetaData.getAddress().asResource(Baseadress.get()));
-
-        if(changeset.containsKey("defaultDataSource") && changeset.get("defaultDataSource").equals(""))
-        {
-            changeset.remove("defaultDataSource");
-            operation.get("default-datasource").set(ModelType.UNDEFINED);
-        }
-
-        // TODO: https://issues.jboss.org/browse/AS7-3596
-        dispatcher.execute(new DMRAction(operation), new SimpleCallback<DMRResponse>() {
-            @Override
-            public void onSuccess(DMRResponse result) {
-                ModelNode response  = result.get();
-
-                if(response.isFailure())
-                {
-                    Console.error(Console.MESSAGES.modificationFailed("JPA Subsystem"), response.getFailureDescription());
-                }
-                else
-                {
-                    Console.info(Console.MESSAGES.modified("JPA Subsystem"));
-                }
-
-                loadSubsystem();
-            }
-        });
-        */
-    }
 }
