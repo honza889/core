@@ -30,22 +30,11 @@ public class JsmNode {
 
 	        for(JsmNode subnode : nodes){
 	            if(!subnode.policy.equals(first.policy)){
-	                return "dif";
+	                return "";
 	            }
             }
 	        return first.policy;
 	    }
-	}
-
-	public static List<String> getPolicyPossibleValues(){
-	    List<String> options = new ArrayList<String>();
-	    options.add("");
-	    options.add("policy1");
-        options.add("policy2");
-        options.add("policy3");
-        options.add("policy4");
-        options.add("policy5");
-	    return options;
 	}
 
     public void initPolicy(String policy){
@@ -57,7 +46,6 @@ public class JsmNode {
 	    if(nodes.isEmpty()){ // server
 	        presenter.setServerPolicy(name, policy);
 	    }else{ // group
-	        // TODO: if policy!="" ?
 	        for(JsmNode subnode : nodes){
 	            subnode.setPolicy(policy);
 	        }

@@ -1,5 +1,6 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
+import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.user.client.Command;
@@ -9,11 +10,13 @@ import com.google.gwt.view.client.TreeViewModel;
 public class JsmTreeViewModel implements TreeViewModel {
 
     Map<String, JsmNode> serverGroups;
+    List<String> policyPossibleValues;
     ListDataProvider<JsmNode> dataProvider = new ListDataProvider<JsmNode>();
     private static Command finishCmd = null;
 
-    public JsmTreeViewModel(Map<String, JsmNode> serverGroups) {
+    public JsmTreeViewModel(Map<String, JsmNode> serverGroups, List<String> policyPossibleValues) {
         this.serverGroups = serverGroups;
+        this.policyPossibleValues = policyPossibleValues;
     }
 
     public <T> NodeInfo<?> getNodeInfo(T value) {
@@ -35,7 +38,7 @@ public class JsmTreeViewModel implements TreeViewModel {
             });
         }
 
-        return new DefaultNodeInfo<JsmNode>(dataProvider, new JsmNodeCell(JsmNode.getPolicyPossibleValues()));
+        return new DefaultNodeInfo<JsmNode>(dataProvider, new JsmNodeCell(policyPossibleValues));
     }
 
     public boolean isLeaf(Object value) {

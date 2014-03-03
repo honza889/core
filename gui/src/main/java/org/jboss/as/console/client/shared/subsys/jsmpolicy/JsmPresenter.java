@@ -53,6 +53,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	public interface MyView extends View {
         void setServerGroups(Map<String,JsmNode> serverGroups);
         void refresh();
+        List<String> getPolicyPossibleValues();
 	}
 
 	@Inject
@@ -66,6 +67,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	protected void onReset() {
         super.onReset();
         loadServerGroups();
+        loadPolicyPossibleValues();
     }
 
 	private void loadServerGroups() {
@@ -180,6 +182,36 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 
             }
         });
+	}
+
+	public void loadPolicyPossibleValues(){
+
+	    final List<String> policyPossibleValues = getView().getPolicyPossibleValues();
+
+	    ModelNode operation = new ModelNode();
+        operation.get(ADDRESS).set("system-property", "org.picketbox.jsmpolicy.dir");
+        operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
+        operation.get(NAME).set("value");
+
+        dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+            public void onSuccess(DMRResponse response) {
+                String directory = response.get().get(ModelDescriptionConstants.RESULT).asString();
+                Console.error("Policy directory: "+directory,"");
+
+                policyPossibleValues.clear();
+                policyPossibleValues.add("");
+
+                policyPossibleValues.add("polA");
+                policyPossibleValues.add("polB");
+                policyPossibleValues.add("polC");
+
+                getView().refresh();
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("Failure loading possible policies", caught.getLocalizedMessage());
+            }
+        });
+
 	}
 
 	protected void revealInParent() {
