@@ -55,7 +55,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	public interface MyView extends View {
         void setServerGroups(Map<String,JsmNode> serverGroups);
         void refresh();
-        List<String> getPolicyPossibleValues();
+        List<JsmPolicy> getPolicyPossibleValues();
 	}
 
 	@Inject
@@ -188,7 +188,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 
 	public void loadPolicyPossibleValues(){
 
-	    final List<String> policyPossibleValues = getView().getPolicyPossibleValues();
+	    final List<JsmPolicy> policyPossibleValues = getView().getPolicyPossibleValues();
 
 	    ModelNode operation = new ModelNode();
 	    operation.get(ADDRESS).set(Baseadress.get());
@@ -203,10 +203,10 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
                 Console.error("Loaded children names",children.toString());
 
                 policyPossibleValues.clear();
-                policyPossibleValues.add("");
+                policyPossibleValues.add(new JsmPolicy("",""));
 
                 for(ModelNode child : children){
-                    policyPossibleValues.add(child.asString());
+                    policyPossibleValues.add(new JsmPolicy(child.asString(),child.asString()));
                 }
 
                 getView().refresh();

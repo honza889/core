@@ -15,7 +15,7 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
 	private VerticalPanel container;
 	private Map<String,JsmNode> serverGroups;
-	private final List<String> policyPossibleValues = new ArrayList<String>();
+	private final List<JsmPolicy> policyPossibleValues = new ArrayList<JsmPolicy>();
 
     public Widget createWidget() {
 
@@ -34,9 +34,9 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 	public void setServerGroups(Map<String,JsmNode> serverGroups) {
 
 		this.serverGroups = serverGroups;
+
 	    JsmTreeViewModel model = new JsmTreeViewModel(serverGroups, policyPossibleValues);
 		CellTree tree = new CellTree(model,"Domain");
-
 		JsmTreeViewModel.runFinish();
 
 		container.clear();
@@ -44,7 +44,7 @@ public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
 
 	}
 
-	public List<String> getPolicyPossibleValues(){
+	public List<JsmPolicy> getPolicyPossibleValues(){
 	    return policyPossibleValues;
 	}
 

@@ -12,6 +12,7 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.SelectElement;
 import com.google.gwt.safehtml.client.SafeHtmlTemplates;
+import com.google.gwt.safehtml.client.SafeHtmlTemplates.Template;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
@@ -29,17 +30,17 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
 
     private HashMap<String, Integer> indexForOption = new HashMap<String, Integer>();
 
-    private final List<String> options;
+    private final List<JsmPolicy> options;
 
-    public JsmNodeCell(List<String> options) {
+    public JsmNodeCell(List<JsmPolicy> options) {
       super(BrowserEvents.CHANGE);
       if (template == null) {
         template = GWT.create(Template.class);
       }
-      this.options = new ArrayList<String>(options);
+      this.options = new ArrayList<JsmPolicy>(options);
       int index = 0;
-      for (String option : options) {
-        indexForOption.put(option, index++);
+      for (JsmPolicy option : options) {
+        indexForOption.put(option.getFile(), index++);
       }
     }
 
@@ -51,7 +52,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
         Object key = context.getKey();
         SelectElement select = parent.getChild(1).cast();
 
-        value.setPolicy(options.get(select.getSelectedIndex()));
+        value.setPolicy(options.get(select.getSelectedIndex()).getFile());
 
         setViewData(key, value);
         finishEditing(parent, value, key, valueUpdater);
@@ -77,11 +78,11 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       int selectedIndex = getSelectedIndex(viewData == null ? value : viewData);
       sb.appendHtmlConstant("<select tabindex=\"-1\" style=\"width:400px\">");
       int index = 0;
-      for (String option : options) {
+      for (JsmPolicy option : options) {
         if (index++ == selectedIndex) {
-          sb.append(template.selected(option));
+          sb.append(template.selected(option.getFile()));
         } else {
-          sb.append(template.deselected(option));
+          sb.append(template.deselected(option.getFile()));
         }
       }
       sb.appendHtmlConstant("</select>");

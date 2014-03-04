@@ -10,11 +10,11 @@ import com.google.gwt.view.client.TreeViewModel;
 public class JsmTreeViewModel implements TreeViewModel {
 
     Map<String, JsmNode> serverGroups;
-    List<String> policyPossibleValues;
+    List<JsmPolicy> policyPossibleValues;
     ListDataProvider<JsmNode> dataProvider = new ListDataProvider<JsmNode>();
     private static Command finishCmd = null;
 
-    public JsmTreeViewModel(Map<String, JsmNode> serverGroups, List<String> policyPossibleValues) {
+    public JsmTreeViewModel(Map<String, JsmNode> serverGroups, List<JsmPolicy> policyPossibleValues) {
         this.serverGroups = serverGroups;
         this.policyPossibleValues = policyPossibleValues;
     }
