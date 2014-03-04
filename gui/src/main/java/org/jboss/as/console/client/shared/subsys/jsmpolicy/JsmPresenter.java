@@ -2,9 +2,11 @@ package org.jboss.as.console.client.shared.subsys.jsmpolicy;
 
 import static org.jboss.dmr.client.ModelDescriptionConstants.ADD;
 import static org.jboss.dmr.client.ModelDescriptionConstants.ADDRESS;
+import static org.jboss.dmr.client.ModelDescriptionConstants.CHILD_TYPE;
 import static org.jboss.dmr.client.ModelDescriptionConstants.NAME;
 import static org.jboss.dmr.client.ModelDescriptionConstants.OP;
 import static org.jboss.dmr.client.ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION;
+import static org.jboss.dmr.client.ModelDescriptionConstants.READ_CHILDREN_NAMES_OPERATION;
 import static org.jboss.dmr.client.ModelDescriptionConstants.VALUE;
 import static org.jboss.dmr.client.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
 
@@ -189,21 +191,23 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	    final List<String> policyPossibleValues = getView().getPolicyPossibleValues();
 
 	    ModelNode operation = new ModelNode();
-        operation.get(ADDRESS).set("system-property", "org.picketbox.jsmpolicy.dir");
-        operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
-        operation.get(NAME).set("value");
+	    operation.get(ADDRESS).set(Baseadress.get());
+        operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+        operation.get(OP).set(READ_CHILDREN_NAMES_OPERATION);
+        operation.get(CHILD_TYPE).set("policy");
 
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
-                String directory = response.get().get(ModelDescriptionConstants.RESULT).asString();
-                Console.error("Policy directory: "+directory,"");
+
+                List<ModelNode> children = response.get().get(ModelDescriptionConstants.RESULT).asList();
+                Console.error("Loaded children names",children.toString());
 
                 policyPossibleValues.clear();
                 policyPossibleValues.add("");
 
-                policyPossibleValues.add("polA");
-                policyPossibleValues.add("polB");
-                policyPossibleValues.add("polC");
+                for(ModelNode child : children){
+                    policyPossibleValues.add(child.asString());
+                }
 
                 getView().refresh();
             }
