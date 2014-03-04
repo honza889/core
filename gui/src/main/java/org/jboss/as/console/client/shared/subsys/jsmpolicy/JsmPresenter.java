@@ -203,10 +203,25 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
                 Console.error("Loaded children names",children.toString());
 
                 policyPossibleValues.clear();
-                policyPossibleValues.add(new JsmPolicy("",""));
+                policyPossibleValues.add(new JsmPolicy("none",""));
 
-                for(ModelNode child : children){
-                    policyPossibleValues.add(new JsmPolicy(child.asString(),child.asString()));
+                for(final ModelNode child : children){
+
+                    ModelNode operation = new ModelNode();
+                    operation.get(ADDRESS).set(Baseadress.get());
+                    operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+                    operation.get(ADDRESS).add("policy", child.asString());
+                    operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
+                    operation.get(NAME).set("file");
+
+                    dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+                        public void onSuccess(DMRResponse response) {
+
+                            String file = response.get().get(ModelDescriptionConstants.RESULT).asString();
+                            policyPossibleValues.add(new JsmPolicy(child.asString(), file));
+
+                        }
+                    });
                 }
 
                 getView().refresh();

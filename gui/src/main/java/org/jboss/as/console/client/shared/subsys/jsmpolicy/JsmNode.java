@@ -42,6 +42,7 @@ public class JsmNode {
     }
 
 	public void setPolicy(String policy){
+	    if(policy.length()==0) policy=null;
 	    this.policy = policy;
 	    if(nodes.isEmpty()){ // server
 	        presenter.setServerPolicy(name, policy);

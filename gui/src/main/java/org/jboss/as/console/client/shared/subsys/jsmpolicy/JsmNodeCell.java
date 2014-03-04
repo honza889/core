@@ -19,11 +19,11 @@ import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
 
     interface Template extends SafeHtmlTemplates {
-      @Template("<option value=\"{0}\">{0}</option>")
-      SafeHtml deselected(String option);
+      @Template("<option value=\"{0}\">{1}</option>")
+      SafeHtml deselected(String value, String name);
 
-      @Template("<option value=\"{0}\" selected=\"selected\">{0}</option>")
-      SafeHtml selected(String option);
+      @Template("<option value=\"{0}\" selected=\"selected\">{1}</option>")
+      SafeHtml selected(String value, String name);
     }
 
     private static Template template;
@@ -80,9 +80,9 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       int index = 0;
       for (JsmPolicy option : options) {
         if (index++ == selectedIndex) {
-          sb.append(template.selected(option.getFile()));
+          sb.append(template.selected(option.getFile(),option.getName()));
         } else {
-          sb.append(template.deselected(option.getFile()));
+          sb.append(template.deselected(option.getFile(),option.getName()));
         }
       }
       sb.appendHtmlConstant("</select>");
