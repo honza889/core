@@ -42,7 +42,6 @@ public class PolicyEditor {
     Widget asWidget() {
 
         table = new DefaultCellTable<PolicyEntity>(8, new ProvidesKey<PolicyEntity>() {
-            @Override
             public Object getKey(PolicyEntity item) {
                 return item.getName();
             }
@@ -64,7 +63,6 @@ public class PolicyEditor {
                 presenter.launchNewSessionWizard();
             }
         });
-        addBtn.ensureDebugId(Console.DEBUG_CONSTANTS.debug_label_add_mailSessionView());
         toolstrip.addToolButtonRight(addBtn);
 
         ToolButton removeBtn = new ToolButton(Console.CONSTANTS.common_label_delete(), new ClickHandler() {
@@ -80,17 +78,19 @@ public class PolicyEditor {
                         });
             }
         });
-        removeBtn.ensureDebugId(Console.DEBUG_CONSTANTS.debug_label_remove_mailSessionView());
         toolstrip.addToolButtonRight(removeBtn);
 
-
-
-        form = new Form<PolicyEntity>(PolicyEntity.class);
+        form = new Form<PolicyEntity>(PolicyEntity.class){
+            /*
+            public FormValidation validate(){
+                return new FormValidation(); // always without errors, because '\n'
+            }
+            */
+        };
         form.setNumColumns(2);
 
         TextItem nameItem = new TextItem("name", "Policy name");
-        //TextBoxItem fileItem = new TextBoxItem("file", "File content", false);
-        TextAreaItem fileItem = new TextAreaItem("file", "File content");
+        NewlinedTextAreaItem fileItem = new NewlinedTextAreaItem("file", "File content", 15);
 
         form.setFields(nameItem, fileItem);
         form.setEnabled(false);
@@ -106,12 +106,12 @@ public class PolicyEditor {
 
         FormToolStrip<PolicyEntity> formToolStrip = new FormToolStrip<PolicyEntity>(
                 form, new FormToolStrip.FormCallback<PolicyEntity>() {
-            @Override
             public void onSave(Map<String, Object> changeset) {
+
+                Console.error("Debug PolicyEditor.onSave: file", (String)changeset.get("file"));
+
                 presenter.onSave(form.getEditedEntity(), changeset);
             }
-
-            @Override
             public void onDelete(PolicyEntity entity) {
 
             }
@@ -124,10 +124,10 @@ public class PolicyEditor {
 
         Widget panel = new MultipleToOneLayout()
                 .setPlain(true)
-                .setTitle("Mail")
-                .setHeadline("Mail Sessions")
-                .setDescription(new SafeHtmlBuilder().appendEscaped("Description").toSafeHtml())
-                .setMaster(Console.MESSAGES.available("Mail Session"), table)
+                .setTitle("Policies")
+                .setHeadline("JSM Policies")
+                .setDescription(new SafeHtmlBuilder().appendEscaped("Java security manager policies definition.").toSafeHtml())
+                .setMaster(Console.MESSAGES.available("JSM Policies"), table)
                 .setMasterTools(toolstrip.asWidget())
                 .setDetailTools(formToolStrip.asWidget())
                 .setDetail(Console.CONSTANTS.common_label_selection(), detail).build();
@@ -141,4 +141,24 @@ public class PolicyEditor {
         dataProvider.setList(list);
         table.selectDefaultEntity();
     }
+
+    public static class NewlinedTextAreaItem extends TextAreaItem {
+
+        public NewlinedTextAreaItem(String name, String title, int lines) {
+            super(name, title);
+            setVisibleLines(lines);
+        }
+
+        @Override
+        public String getValue() {
+            return textArea.getValue().replace("\n", "\\n");
+        }
+
+        @Override
+        public boolean validate(String value) {
+            return true;
+        }
+
+    }
+
 }

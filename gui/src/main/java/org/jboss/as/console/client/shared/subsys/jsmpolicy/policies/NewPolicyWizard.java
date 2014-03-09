@@ -30,30 +30,18 @@ public class NewPolicyWizard {
         form.setFields(new TextBoxItem("name", "Policy name"));
 
         DialogueOptions options = new DialogueOptions(
-
-                // save
-                new ClickHandler() {
-                    @Override
+                new ClickHandler() { // save
                     public void onClick(ClickEvent event) {
-                        // merge base
-
                         FormValidation validation = form.validate();
-                        if(validation.hasErrors())
-                            return;
-
+                        if(validation.hasErrors()) return;
                         presenter.onCreateSession(form.getUpdatedEntity());
-
                     }
                 },
-
-                // cancel
-                new ClickHandler() {
-                    @Override
+                new ClickHandler() { // cancel
                     public void onClick(ClickEvent event) {
                         presenter.closeDialoge();
                     }
                 }
-
         );
 
         // ----------------------------------------
@@ -61,7 +49,6 @@ public class NewPolicyWizard {
         Widget formWidget = form.asWidget();
         final FormHelpPanel helpPanel = new FormHelpPanel(
                 new FormHelpPanel.AddressCallback() {
-                    @Override
                     public ModelNode getAddress() {
                         ModelNode address = Baseadress.get();
                         address.add("subsystem", "jsmpolicy");

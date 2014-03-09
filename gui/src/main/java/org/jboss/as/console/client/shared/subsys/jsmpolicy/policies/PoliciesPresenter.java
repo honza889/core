@@ -87,11 +87,11 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
     @Override
     protected void onReset() {
         super.onReset();
-        loadMailSessions();
+        loadPoliciesList();
     }
 
     public void launchNewSessionWizard() {
-        window = new DefaultWindow(Console.MESSAGES.createTitle("Mail Session"));
+        window = new DefaultWindow(Console.MESSAGES.createTitle("JSM Policy"));
         window.setWidth(480);
         window.setHeight(360);
         window.trapWidget(new NewPolicyWizard(PoliciesPresenter.this).asWidget());
@@ -99,7 +99,7 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
         window.center();
     }
 
-    private void loadMailSessions() {
+    private void loadPoliciesList() {
         ModelNode operation = beanMetaData.getAddress().asSubresource(Baseadress.get());
         operation.get(OP).set(READ_CHILDREN_RESOURCES_OPERATION);
         operation.get(RECURSIVE).set(true);
@@ -110,39 +110,15 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
                 ModelNode response = result.get();
 
                 if (response.isFailure()) {
-                    Console.error(Console.MESSAGES.failed("Mail Sessions"));
+                    Console.error(Console.MESSAGES.failed("JSM Policies"));
                 } else {
                     List<Property> items = response.get(RESULT).asPropertyList();
                     List<PolicyEntity> sessions = new ArrayList<PolicyEntity>(items.size());
                     for (Property item : items) {
                         ModelNode model = item.getValue();
-                        PolicyEntity mailSession = adapter.fromDMR(model);
-                        mailSession.setName(item.getName());
-                        // TODO: FILE ?
-                        sessions.add(mailSession);
-
-                        /*
-                        if (model.hasDefined("server")) {
-                            List<Property> serverList = model.get("server").asPropertyList();
-                            for (Property server : serverList) {
-                                if (server.getName().equals(ServerType.smtp.name())) {
-                                    MailServer2Definition smtpServer = serverAdapter.fromDMR(server.getValue());
-                                    smtpServer.setType(ServerType.smtp);
-                                    mailSession.setSmtpServer(smtpServer);
-                                } else if (server.getName().equals(ServerType.imap.name())) {
-                                    MailServer2Definition imap = serverAdapter.fromDMR(server.getValue());
-                                    imap.setType(ServerType.imap);
-                                    mailSession.setImapServer(imap);
-                                } else if (server.getName().equals(ServerType.pop3.name())) {
-                                    MailServer2Definition pop = serverAdapter.fromDMR(server.getValue());
-                                    pop.setType(ServerType.pop3);
-                                    mailSession.setPopServer(pop);
-                                }
-                            }
-
-                        }
-                        */
-
+                        PolicyEntity policy = adapter.fromDMR(model);
+                        policy.setName(item.getName());
+                        sessions.add(policy);
                     }
                     getView().updateFrom(sessions);
                 }
@@ -173,11 +149,11 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
             public void onSuccess(DMRResponse result) {
                 ModelNode response  = result.get();
                 if (response.isFailure()) {
-                    Console.error(Console.MESSAGES.addingFailed("Mail Session"), response.getFailureDescription());
+                    Console.error(Console.MESSAGES.addingFailed("JSM Policy"), response.getFailureDescription());
                 } else {
-                    Console.info(Console.MESSAGES.added("Mail Session " + entity.getName()));
+                    Console.info(Console.MESSAGES.added("JSM Policy " + entity.getName()));
                 }
-                loadMailSessions();
+                loadPoliciesList();
             }
         });
     }
@@ -191,16 +167,17 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
             public void onSuccess(DMRResponse result) {
                 ModelNode response  = result.get();
                 if (response.isFailure()) {
-                    Console.error(Console.MESSAGES.deletionFailed("Mail Session"), response.getFailureDescription());
+                    Console.error(Console.MESSAGES.deletionFailed("JSM Policy"), response.getFailureDescription());
                 } else {
-                    Console.info(Console.MESSAGES.deleted("Mail Session " + entity.getName()));
+                    Console.info(Console.MESSAGES.deleted("JSM Policy " + entity.getName()));
                 }
-                loadMailSessions();
+                loadPoliciesList();
             }
         });
     }
 
     public void onSave(final PolicyEntity editedEntity, Map<String, Object> changeset) {
+
         ModelNode address = beanMetaData.getAddress().asResource(
                 Baseadress.get(),
                 editedEntity.getName()
@@ -212,12 +189,12 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
             public void onSuccess(DMRResponse result) {
                 ModelNode response  = result.get();
                 if (response.isFailure()) {
-                    Console.error(Console.MESSAGES.modificationFailed("Mail Session"),
+                    Console.error(Console.MESSAGES.modificationFailed("JSM Policy"),
                             response.getFailureDescription());
                 } else {
-                    Console.info(Console.MESSAGES.modified("Mail Session " + editedEntity.getName()));
+                    Console.info(Console.MESSAGES.modified("JSM Policy " + editedEntity.getName()));
                 }
-                loadMailSessions();
+                loadPoliciesList();
             }
         });
     }

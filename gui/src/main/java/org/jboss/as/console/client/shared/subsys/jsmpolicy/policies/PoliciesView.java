@@ -11,10 +11,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-/**
- * @author Heiko Braun
- * @date 11/28/11
- */
 public class PoliciesView extends DisposableViewImpl implements PoliciesPresenter.MyView{
 
     private PoliciesPresenter presenter;
@@ -28,7 +24,7 @@ public class PoliciesView extends DisposableViewImpl implements PoliciesPresente
 
         LayoutPanel layout = new LayoutPanel();
 
-        FakeTabPanel titleBar = new FakeTabPanel("Mail");
+        FakeTabPanel titleBar = new FakeTabPanel("Policies");
         layout.add(titleBar);
 
         panel = new PagedView();
@@ -47,12 +43,10 @@ public class PoliciesView extends DisposableViewImpl implements PoliciesPresente
         return layout;
     }
 
-    @Override
     public void setPresenter(PoliciesPresenter presenter) {
         this.presenter = presenter;
     }
 
-    @Override
     public void updateFrom(List<PolicyEntity> list) {
         this.sessions = list;
         sessionEditor.updateFrom(list);
