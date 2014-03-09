@@ -11,7 +11,7 @@ import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class JsmView extends DisposableViewImpl implements JsmPresenter.MyView {
+public class JsmView extends DisposableViewImpl implements JsmServersPresenter.MyView {
 
 	private VerticalPanel container;
 	private Map<String,JsmNode> serverGroups;

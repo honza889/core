@@ -7,9 +7,9 @@ public class JsmNode {
 	String name;
 	String policy = "init";
 	List<JsmNode> nodes = new ArrayList<JsmNode>();
-	JsmPresenter presenter;
+	JsmServersPresenter presenter;
 
-	public JsmNode(String name, JsmPresenter presenter){
+	public JsmNode(String name, JsmServersPresenter presenter){
 		this.name = name;
 		this.presenter = presenter;
 	}

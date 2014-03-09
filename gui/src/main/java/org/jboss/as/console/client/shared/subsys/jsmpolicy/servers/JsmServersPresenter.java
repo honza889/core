@@ -39,19 +39,19 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 
-public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.MyProxy> {
+public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, JsmServersPresenter.MyProxy> {
 
 	private RevealStrategy revealStrategy;
 	private HostInformationStore hostStore;
 	private DispatchAsync dispatcher;
 
 	@ProxyCodeSplit
-	@NameToken("jsmpolicy")
+	@NameToken("jsmpolicy-servers")
 	@AccessControl(resources = {
             "{selected.profile}/subsystem=jsmpolicy"
     })
 	@SubsystemExtension(name = "Servers", group = "JSM Policy", key = "jsmpolicy")
-	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
+	public interface MyProxy extends Proxy<JsmServersPresenter>, Place {}
 	public interface MyView extends View {
         void setServerGroups(Map<String,JsmNode> serverGroups);
         void refresh();
@@ -59,7 +59,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	}
 
 	@Inject
-	public JsmPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, DispatchAsync dispatcher) {
+	public JsmServersPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
 		this.hostStore = hostStore;
@@ -74,7 +74,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 
 	private void loadServerGroups() {
 		try {
-	        final JsmPresenter presenter = this;
+	        final JsmServersPresenter presenter = this;
 		    hostStore.loadHostsAndServerInstances(new SimpleCallback<List<HostInfo>>() {
 				public void onSuccess(List<HostInfo> hosts) {
 					try {
