@@ -1,12 +1,7 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy.policies;
 
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.VerticalPanel;
-import com.google.gwt.user.client.ui.Widget;
 import org.jboss.as.console.client.shared.help.FormHelpPanel;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
-import org.jboss.as.console.client.widgets.forms.items.JndiNameItem;
 import org.jboss.ballroom.client.widgets.forms.Form;
 import org.jboss.ballroom.client.widgets.forms.FormValidation;
 import org.jboss.ballroom.client.widgets.forms.TextBoxItem;
@@ -14,15 +9,16 @@ import org.jboss.ballroom.client.widgets.window.DialogueOptions;
 import org.jboss.ballroom.client.widgets.window.WindowContentBuilder;
 import org.jboss.dmr.client.ModelNode;
 
-/**
- * @author Heiko Braun
- * @date 11/28/11
- */
-public class NewMailSessionWizard {
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.user.client.ui.Widget;
 
-    private final JsmPoliciesPresenter presenter;
+public class NewPolicyWizard {
 
-    public NewMailSessionWizard(final JsmPoliciesPresenter presenter) {
+    private final PoliciesPresenter presenter;
+
+    public NewPolicyWizard(final PoliciesPresenter presenter) {
         this.presenter = presenter;
     }
 
@@ -30,9 +26,8 @@ public class NewMailSessionWizard {
         VerticalPanel layout = new VerticalPanel();
         layout.setStyleName("window-content");
 
-        final Form<JsmPoliciesSession> form = new Form<JsmPoliciesSession>(JsmPoliciesSession.class);
-        TextBoxItem jndi = new JndiNameItem("jndiName", "JNDI Name");
-        form.setFields(jndi);
+        final Form<PolicyEntity> form = new Form<PolicyEntity>(PolicyEntity.class);
+        form.setFields(new TextBoxItem("name", "Policy name"));
 
         DialogueOptions options = new DialogueOptions(
 
@@ -69,8 +64,8 @@ public class NewMailSessionWizard {
                     @Override
                     public ModelNode getAddress() {
                         ModelNode address = Baseadress.get();
-                        address.add("subsystem", "mail");
-                        address.add("mail-session", "*");
+                        address.add("subsystem", "jsmpolicy");
+                        address.add("policy", "*");
                         return address;
                     }
                 }, form

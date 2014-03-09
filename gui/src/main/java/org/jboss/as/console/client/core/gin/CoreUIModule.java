@@ -240,8 +240,8 @@ import org.jboss.dmr.client.dispatch.impl.HandlerRegistry;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmView;
 
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.JsmPoliciesPresenter;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.JsmPoliciesView;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesView;
 
 /**
  * Provides the bindings for the core UI widgets.
@@ -731,10 +731,10 @@ public class CoreUIModule extends AbstractPresenterModule {
                 JsmView.class,
                 JsmServersPresenter.MyProxy.class);
         
-        bindPresenter(JsmPoliciesPresenter.class,
-                JsmPoliciesPresenter.MyView.class,
-                JsmPoliciesView.class,
-                JsmPoliciesPresenter.MyProxy.class);
+        bindPresenter(PoliciesPresenter.class,
+                PoliciesPresenter.MyView.class,
+                PoliciesView.class,
+                PoliciesPresenter.MyProxy.class);
         
     }
 }

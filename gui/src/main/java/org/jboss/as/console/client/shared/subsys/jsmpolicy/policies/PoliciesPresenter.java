@@ -38,15 +38,12 @@ import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.PlaceManager;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 
-/**
- * @author Heiko Braun
- */
-public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView, JsmPoliciesPresenter.MyProxy> {
+public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, PoliciesPresenter.MyProxy> {
 
     private final PlaceManager placeManager;
     private final RevealStrategy revealStrategy;
     private final DispatchAsync dispatcher;
-    private final EntityAdapter<JsmPoliciesSession> adapter;
+    private final EntityAdapter<PolicyEntity> adapter;
     private final BeanMetaData beanMetaData;
 
     private DefaultWindow window;
@@ -57,15 +54,15 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
             "{selected.profile}/subsystem=jsmpolicy"
     })
     @SubsystemExtension(name = "Policies", group = "JSM Policy", key = "jsmpolicy")
-    public interface MyProxy extends Proxy<JsmPoliciesPresenter>, Place {}
+    public interface MyProxy extends Proxy<PoliciesPresenter>, Place {}
 
     public interface MyView extends View {
-        void setPresenter(JsmPoliciesPresenter presenter);
-        void updateFrom(List<JsmPoliciesSession> list);
+        void setPresenter(PoliciesPresenter presenter);
+        void updateFrom(List<PolicyEntity> list);
     }
 
     @Inject
-    public JsmPoliciesPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
+    public PoliciesPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
             DispatchAsync dispatcher, RevealStrategy revealStrategy, ApplicationMetaData metaData) {
 
         super(eventBus, view, proxy);
@@ -73,8 +70,8 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
         this.placeManager = placeManager;
         this.revealStrategy = revealStrategy;
         this.dispatcher = dispatcher;
-        this.beanMetaData = metaData.getBeanMetaData(JsmPoliciesSession.class);
-        this.adapter = new EntityAdapter<JsmPoliciesSession>(JsmPoliciesSession.class, metaData);
+        this.beanMetaData = metaData.getBeanMetaData(PolicyEntity.class);
+        this.adapter = new EntityAdapter<PolicyEntity>(PolicyEntity.class, metaData);
     }
 
     @Override
@@ -97,7 +94,7 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
         window = new DefaultWindow(Console.MESSAGES.createTitle("Mail Session"));
         window.setWidth(480);
         window.setHeight(360);
-        window.trapWidget(new NewMailSessionWizard(JsmPoliciesPresenter.this).asWidget());
+        window.trapWidget(new NewPolicyWizard(PoliciesPresenter.this).asWidget());
         window.setGlassEnabled(true);
         window.center();
     }
@@ -116,10 +113,10 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
                     Console.error(Console.MESSAGES.failed("Mail Sessions"));
                 } else {
                     List<Property> items = response.get(RESULT).asPropertyList();
-                    List<JsmPoliciesSession> sessions = new ArrayList<JsmPoliciesSession>(items.size());
+                    List<PolicyEntity> sessions = new ArrayList<PolicyEntity>(items.size());
                     for (Property item : items) {
                         ModelNode model = item.getValue();
-                        JsmPoliciesSession mailSession = adapter.fromDMR(model);
+                        PolicyEntity mailSession = adapter.fromDMR(model);
                         mailSession.setName(item.getName());
                         // TODO: FILE ?
                         sessions.add(mailSession);
@@ -162,11 +159,10 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
         window.hide();
     }
 
-    public void onCreateSession(final JsmPoliciesSession entity) {
+    public void onCreateSession(final PolicyEntity entity) {
         closeDialoge();
 
-        String name = entity.getName() != null ? entity.getName() : entity.getJndiName();
-        ModelNode address = beanMetaData.getAddress().asResource(Baseadress.get(), name);
+        ModelNode address = beanMetaData.getAddress().asResource(Baseadress.get(), entity.getName());
 
         ModelNode operation = adapter.fromEntity(entity);
         operation.get(ADDRESS).set(address.get(ADDRESS));
@@ -186,7 +182,7 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
         });
     }
 
-    public void onDelete(final JsmPoliciesSession entity) {
+    public void onDelete(final PolicyEntity entity) {
         ModelNode operation = beanMetaData.getAddress().asResource(Baseadress.get(), entity.getName());
         operation.get(OP).set(REMOVE);
 
@@ -204,7 +200,7 @@ public class JsmPoliciesPresenter extends Presenter<JsmPoliciesPresenter.MyView,
         });
     }
 
-    public void onSave(final JsmPoliciesSession editedEntity, Map<String, Object> changeset) {
+    public void onSave(final PolicyEntity editedEntity, Map<String, Object> changeset) {
         ModelNode address = beanMetaData.getAddress().asResource(
                 Baseadress.get(),
                 editedEntity.getName()

@@ -15,12 +15,12 @@ import com.google.gwt.user.client.ui.Widget;
  * @author Heiko Braun
  * @date 11/28/11
  */
-public class JsmPoliciesView extends DisposableViewImpl implements JsmPoliciesPresenter.MyView{
+public class PoliciesView extends DisposableViewImpl implements PoliciesPresenter.MyView{
 
-    private JsmPoliciesPresenter presenter;
+    private PoliciesPresenter presenter;
     private PagedView panel;
-    private JsmPoliciesSessionEditor sessionEditor;
-    private List<JsmPoliciesSession> sessions;
+    private PolicyEditor sessionEditor;
+    private List<PolicyEntity> sessions;
 
     @Override
     public Widget createWidget() {
@@ -33,7 +33,7 @@ public class JsmPoliciesView extends DisposableViewImpl implements JsmPoliciesPr
 
         panel = new PagedView();
 
-        sessionEditor = new JsmPoliciesSessionEditor(presenter);
+        sessionEditor = new PolicyEditor(presenter);
 
         panel.addPage(Console.CONSTANTS.common_label_back(), sessionEditor.asWidget());
         panel.showPage(0);
@@ -48,12 +48,12 @@ public class JsmPoliciesView extends DisposableViewImpl implements JsmPoliciesPr
     }
 
     @Override
-    public void setPresenter(JsmPoliciesPresenter presenter) {
+    public void setPresenter(PoliciesPresenter presenter) {
         this.presenter = presenter;
     }
 
     @Override
-    public void updateFrom(List<JsmPoliciesSession> list) {
+    public void updateFrom(List<PolicyEntity> list) {
         this.sessions = list;
         sessionEditor.updateFrom(list);
     }
