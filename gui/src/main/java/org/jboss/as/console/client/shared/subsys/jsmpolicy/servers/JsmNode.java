@@ -1,4 +1,4 @@
-package org.jboss.as.console.client.shared.subsys.jsmpolicy;
+package org.jboss.as.console.client.shared.subsys.jsmpolicy.servers;
 
 import java.util.ArrayList;
 import java.util.List;
