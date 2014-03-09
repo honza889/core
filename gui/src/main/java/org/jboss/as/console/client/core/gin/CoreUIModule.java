@@ -182,8 +182,6 @@ import org.jboss.as.console.client.shared.subsys.jmx.JMXPresenter;
 import org.jboss.as.console.client.shared.subsys.jmx.JMXSubsystemView;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaPresenter;
 import org.jboss.as.console.client.shared.subsys.jpa.JpaView;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmView;
 import org.jboss.as.console.client.shared.subsys.logging.HandlerListManager;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingPresenter;
 import org.jboss.as.console.client.shared.subsys.logging.LoggingView;
@@ -238,6 +236,12 @@ import org.jboss.dmr.client.dispatch.HandlerMapping;
 import org.jboss.dmr.client.dispatch.impl.DMRHandler;
 import org.jboss.dmr.client.dispatch.impl.DispatchAsyncImpl;
 import org.jboss.dmr.client.dispatch.impl.HandlerRegistry;
+
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmView;
+
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.JsmPoliciesPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.JsmPoliciesView;
 
 /**
  * Provides the bindings for the core UI widgets.
@@ -726,6 +730,11 @@ public class CoreUIModule extends AbstractPresenterModule {
                 JsmServersPresenter.MyView.class,
                 JsmView.class,
                 JsmServersPresenter.MyProxy.class);
+        
+        bindPresenter(JsmPoliciesPresenter.class,
+                JsmPoliciesPresenter.MyView.class,
+                JsmPoliciesView.class,
+                JsmPoliciesPresenter.MyProxy.class);
         
     }
 }
