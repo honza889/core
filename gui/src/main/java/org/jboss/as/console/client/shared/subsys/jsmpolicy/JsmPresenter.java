@@ -50,7 +50,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
 	@AccessControl(resources = {
             "{selected.profile}/subsystem=jsmpolicy"
     })
-	@SubsystemExtension(name = "JSM Policies", group = "JSM Policy", key = "jsmpolicy")
+	@SubsystemExtension(name = "Servers", group = "JSM Policy", key = "jsmpolicy")
 	public interface MyProxy extends Proxy<JsmPresenter>, Place {}
 	public interface MyView extends View {
         void setServerGroups(Map<String,JsmNode> serverGroups);
@@ -149,7 +149,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
 
-                Console.info("Policy of server "+server+" set to "+policy);
+                Console.info("Policy of server \""+server+"\" set to \""+policy+"\"");
 
                 getView().refresh();
             }
@@ -171,7 +171,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
                 dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
                     public void onSuccess(DMRResponse response) {
 
-                        Console.info("Policy of server "+server+" changed to "+policy);
+                        Console.info("Policy of server \""+server+"\" changed to \""+policy+"\"");
 
                         getView().refresh();
                     }
@@ -200,7 +200,6 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
             public void onSuccess(DMRResponse response) {
 
                 List<ModelNode> children = response.get().get(ModelDescriptionConstants.RESULT).asList();
-                Console.error("Loaded children names",children.toString());
 
                 policyPossibleValues.clear();
                 policyPossibleValues.add(new JsmPolicy("none",""));

@@ -40,7 +40,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       this.options = new ArrayList<JsmPolicy>(options);
       int index = 0;
       for (JsmPolicy option : options) {
-        indexForOption.put(option.getFile(), index++);
+        indexForOption.put(option.getName(), index++);
       }
     }
 
@@ -52,7 +52,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
         Object key = context.getKey();
         SelectElement select = parent.getChild(1).cast();
 
-        value.setPolicy(options.get(select.getSelectedIndex()).getFile());
+        value.setPolicy(options.get(select.getSelectedIndex()).getName());
 
         setViewData(key, value);
         finishEditing(parent, value, key, valueUpdater);
@@ -80,9 +80,9 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       int index = 0;
       for (JsmPolicy option : options) {
         if (index++ == selectedIndex) {
-          sb.append(template.selected(option.getFile(),option.getName()));
+          sb.append(template.selected(option.getName(),option.getName()));
         } else {
-          sb.append(template.deselected(option.getFile(),option.getName()));
+          sb.append(template.deselected(option.getName(),option.getName()));
         }
       }
       sb.appendHtmlConstant("</select>");
