@@ -22,19 +22,4 @@ public interface JsmPoliciesSession {
     String getFrom();
     void setFrom(String jndiName);
 
-    boolean isDebug();
-    void setDebug(boolean debug);
-
-    @Binding(skip = true)
-    MailServer2Definition getSmtpServer();
-    void setSmtpServer(MailServer2Definition server);
-
-    @Binding(skip=true)
-    MailServer2Definition getImapServer();
-    void setImapServer(MailServer2Definition server);
-
-    @Binding(skip=true)
-    MailServer2Definition getPopServer();
-    void setPopServer(MailServer2Definition server);
-
 }

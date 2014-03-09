@@ -95,7 +95,6 @@ import org.jboss.as.console.client.shared.subsys.jgroups.JGroupsTransport;
 import org.jboss.as.console.client.shared.subsys.jmx.model.JMXSubsystem;
 import org.jboss.as.console.client.shared.subsys.jpa.model.JpaSubsystem;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.JsmPoliciesSession;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.MailServer2Definition;
 import org.jboss.as.console.client.shared.subsys.logging.model.AsyncHandler;
 import org.jboss.as.console.client.shared.subsys.logging.model.ConsoleHandler;
 import org.jboss.as.console.client.shared.subsys.logging.model.CustomHandler;
@@ -312,5 +311,4 @@ public interface CoreBeanFactory {
 
     // JSM Policy
     AutoBean<JsmPoliciesSession> jsmPoliciesSession();
-    AutoBean<MailServer2Definition> mailServer2Definition();
 }
