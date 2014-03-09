@@ -79,11 +79,13 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       sb.appendHtmlConstant("<select tabindex=\"-1\" style=\"width:400px\">");
       int index = 0;
       for (JsmPolicy option : options) {
-        if (index++ == selectedIndex) {
-          sb.append(template.selected(option.getName(),option.getName()));
-        } else {
-          sb.append(template.deselected(option.getName(),option.getName()));
-        }
+          String optionName = option.getName() == null ? "none" : option.getName();
+          String optionValue = option.getName() == null ? "" : option.getName();
+          if (index++ == selectedIndex) {
+              sb.append(template.selected(optionValue, optionName));
+          } else {
+              sb.append(template.deselected(optionValue, optionName));
+          }
       }
       sb.appendHtmlConstant("</select>");
     }

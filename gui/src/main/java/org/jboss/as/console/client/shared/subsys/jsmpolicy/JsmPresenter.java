@@ -202,7 +202,7 @@ public class JsmPresenter extends Presenter<JsmPresenter.MyView, JsmPresenter.My
                 List<ModelNode> children = response.get().get(ModelDescriptionConstants.RESULT).asList();
 
                 policyPossibleValues.clear();
-                policyPossibleValues.add(new JsmPolicy("none",""));
+                policyPossibleValues.add(new JsmPolicy(null,null));
 
                 for(final ModelNode child : children){
 
