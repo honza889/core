@@ -80,13 +80,7 @@ public class PolicyEditor {
         });
         toolstrip.addToolButtonRight(removeBtn);
 
-        form = new Form<PolicyEntity>(PolicyEntity.class){
-            /*
-            public FormValidation validate(){
-                return new FormValidation(); // always without errors, because '\n'
-            }
-            */
-        };
+        form = new Form<PolicyEntity>(PolicyEntity.class);
         form.setNumColumns(2);
 
         TextItem nameItem = new TextItem("name", "Policy name");
@@ -107,9 +101,6 @@ public class PolicyEditor {
         FormToolStrip<PolicyEntity> formToolStrip = new FormToolStrip<PolicyEntity>(
                 form, new FormToolStrip.FormCallback<PolicyEntity>() {
             public void onSave(Map<String, Object> changeset) {
-
-                Console.error("Debug PolicyEditor.onSave: file", (String)changeset.get("file"));
-
                 presenter.onSave(form.getEditedEntity(), changeset);
             }
             public void onDelete(PolicyEntity entity) {
@@ -151,12 +142,17 @@ public class PolicyEditor {
 
         @Override
         public String getValue() {
-            return textArea.getValue().replace("\n", "\\n");
+            return textArea.getValue().replace("\n", "\\n"); // backslashing before saving
         }
 
         @Override
         public boolean validate(String value) {
             return true;
+        }
+
+        @Override
+        public String asString() { // showed in PlainFormView
+            return textArea.getValue();
         }
 
     }
