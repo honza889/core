@@ -141,7 +141,7 @@ import org.jboss.as.console.spi.GinExtension;
 import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.HandlerMapping;
 import org.jboss.dmr.client.dispatch.impl.DMRHandler;
-
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.server.DetailPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesPresenter;
 
@@ -350,10 +350,11 @@ public interface CoreUI {
     UnauthorisedPresenter getUnauthorisedPresenter();
 
     AsyncProvider<DialogPresenter> getDialogPresenter();
-    
-    
+
+
     // JSM Policy
     AsyncProvider<JsmServersPresenter> getJsmServersPresenter();
     AsyncProvider<PoliciesPresenter> getJsmPoliciesPresenter();
-    
+    AsyncProvider<DetailPresenter> getDetailPresenter();
+
 }
