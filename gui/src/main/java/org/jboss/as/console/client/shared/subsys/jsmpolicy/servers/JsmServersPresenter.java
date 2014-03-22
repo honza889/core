@@ -27,6 +27,7 @@ import org.jboss.as.console.spi.AccessControl;
 import org.jboss.as.console.spi.SubsystemExtension;
 import org.jboss.dmr.client.ModelDescriptionConstants;
 import org.jboss.dmr.client.ModelNode;
+import org.jboss.dmr.client.ModelType;
 import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.impl.DMRAction;
 import org.jboss.dmr.client.dispatch.impl.DMRResponse;
@@ -255,7 +256,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
             public void onSuccess(DMRResponse response) {
 
                 ModelNode result = response.get().get(ModelDescriptionConstants.RESULT);
-                if(result==null) return;
+                if(result.getType()!=ModelType.LIST) return;
                 List<ModelNode> children = result.asList();
 
                 policyPossibleValues.clear();
