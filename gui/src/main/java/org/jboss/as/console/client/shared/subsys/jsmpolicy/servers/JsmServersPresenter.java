@@ -168,8 +168,33 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 
 	public void setServerPolicy(final String server, final String policy){
 
-        // write attribute
+	    // read attribute
         ModelNode operation = new ModelNode();
+        operation.get(ADDRESS).set(Baseadress.get());
+        operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+        operation.get(ADDRESS).add("server", server);
+        operation.get(NAME).set("policy");
+        operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
+
+        dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+            public void onSuccess(DMRResponse response) {
+                ModelNode outcome = response.get().get(ModelDescriptionConstants.OUTCOME);
+                if(outcome.asString().equals(ModelDescriptionConstants.SUCCESS)){
+                    writeServerPolicy(server, policy);
+                }else{
+                    addServerPolicy(server, policy);
+                }
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("Failure getting state of server policy", caught.getLocalizedMessage());
+            }
+        });
+	}
+
+	protected void writeServerPolicy(final String server, final String policy){
+
+	    // write attribute
+	    ModelNode operation = new ModelNode();
         operation.get(ADDRESS).set(Baseadress.get());
         operation.get(ADDRESS).add("subsystem", "jsmpolicy");
         operation.get(ADDRESS).add("server", server);
@@ -186,33 +211,35 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                 Console.info("Policy of server " + server + " changed to " + policy);
                 getView().refresh();
             }
-
-            public void onFailure(final Throwable caught2) {
-                // add node
-                final ModelNode operation = new ModelNode();
-                operation.get(ADDRESS).set(Baseadress.get());
-                operation.get(ADDRESS).add("subsystem", "jsmpolicy");
-                operation.get(ADDRESS).add("server", server);
-                operation.get(OP).set(ADD);
-                if (policy != null) {
-                    operation.get("policy").set(policy);
-                }
-
-                dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
-                    public void onSuccess(DMRResponse response) {
-                        Console.info("Policy of server " + server + " set to " + policy);
-                        getView().refresh();
-                    }
-                    public void onFailure(Throwable caught1) {
-                        Console.error("Failure setting server policy",
-                                      caught1.getLocalizedMessage() + "\n" +
-                                      caught2.getLocalizedMessage());
-                    }
-                });
+            public void onFailure(Throwable caught) {
+                Console.error("Failure writing of server policy", caught.getLocalizedMessage());
             }
         });
-
 	}
+
+	protected void addServerPolicy(final String server, final String policy){
+
+        // add node with attribute
+        ModelNode operation = new ModelNode();
+        operation.get(ADDRESS).set(Baseadress.get());
+        operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+        operation.get(ADDRESS).add("server", server);
+        operation.get(NAME).set("policy");
+        operation.get(OP).set(ADD);
+        if (policy != null) {
+            operation.get("policy").set(policy);
+        }
+
+        dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+            public void onSuccess(DMRResponse response) {
+                Console.info("Policy of server " + server + " changed to " + policy);
+                getView().refresh();
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("Failure of adding server policy", caught.getLocalizedMessage());
+            }
+        });
+    }
 
 	public void loadPolicyPossibleValues(){
 
@@ -227,7 +254,9 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
 
-                List<ModelNode> children = response.get().get(ModelDescriptionConstants.RESULT).asList();
+                ModelNode result = response.get().get(ModelDescriptionConstants.RESULT);
+                if(result==null) return;
+                List<ModelNode> children = result.asList();
 
                 policyPossibleValues.clear();
                 policyPossibleValues.add(new JsmPolicy(null,null));

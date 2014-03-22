@@ -30,9 +30,11 @@ public class JsmTreeViewModel implements TreeViewModel {
         } else {
             setFinish(new Command() {
                 public void execute() {
-                    dataProvider.getList().clear();
-                    for (JsmNode group : serverGroups.values()) {
-                        dataProvider.getList().add(group);
+                    if(serverGroups!=null){
+                        dataProvider.getList().clear();
+                        for (JsmNode group : serverGroups.values()) {
+                            dataProvider.getList().add(group);
+                        }
                     }
                 }
             });
@@ -50,8 +52,8 @@ public class JsmTreeViewModel implements TreeViewModel {
     }
 
     public static void runFinish() {
-        if (finishCmd != null)
-            finishCmd.execute();
+        Command finishCmd = JsmTreeViewModel.finishCmd;
+        if (finishCmd != null) finishCmd.execute();
     }
 
 }
