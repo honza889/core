@@ -23,6 +23,9 @@ import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.domain.topology.HostInfo;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PolicyEntity;
+import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
+import org.jboss.as.console.client.widgets.forms.BeanMetaData;
 import org.jboss.as.console.spi.AccessControl;
 import org.jboss.as.console.spi.SubsystemExtension;
 import org.jboss.dmr.client.ModelDescriptionConstants;
@@ -71,25 +74,31 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 
 	protected void onReset() {
         super.onReset();
+        Console.warning("JsmServersPresenter.onReset()");
         loadServerGroups();
         loadPolicyPossibleValues();
     }
 
-	private void loadServerGroups() {
-		    ModelNode operation = new ModelNode();
-            operation.get(ADDRESS).set(Baseadress.get());
-            operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
-            operation.get(NAME).set("launch-type");
-            dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
-                public void onSuccess(DMRResponse response) {
-                    String result = response.get().get(ModelDescriptionConstants.RESULT).asString();
-                    if(result.equalsIgnoreCase("STANDALONE")){
-                        loadServerGroupsInStandalone();
-                    }else{
-                        loadServerGroupsInDomain();
-                    }
+	protected void loadServerGroups() {
+	    ModelNode operation = new ModelNode();
+        operation.get(ADDRESS).set(new ModelNode());
+        operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
+        operation.get(NAME).set("launch-type");
+        dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+            public void onSuccess(DMRResponse response) {
+                String result = response.get().get(ModelDescriptionConstants.RESULT).asString();
+                if(result.equalsIgnoreCase("STANDALONE")){
+                    Console.warning("JsmServersPresenter.loadServerGroups()-standalone");
+                    loadServerGroupsInStandalone();
+                }else{
+                    Console.warning("JsmServersPresenter.loadServerGroups()-domain");
+                    loadServerGroupsInDomain();
                 }
-            });
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("loadServerGroups() failed", caught.getLocalizedMessage());
+            }
+        });
 	}
 
 	private void loadServerGroupsInStandalone() {
@@ -102,6 +111,8 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
             public void onSuccess(DMRResponse response) {
                 String serverName = response.get().get(ModelDescriptionConstants.RESULT).asString();
 
+                Console.warning("loadServerGroupsInStandalone.success..."+serverName);
+
                 Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
 
                 JsmNode serverNode = new JsmNode(serverName, presenter);
@@ -109,6 +120,9 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                 serverGroups.put(serverName, serverNode);
 
                 getView().setServerGroups(serverGroups);
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("loadServerGroupsInStandalone() failed", caught.getLocalizedMessage());
             }
         });
     }
@@ -118,6 +132,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         final JsmServersPresenter presenter = this;
         hostStore.loadHostsAndServerInstances(new SimpleCallback<List<HostInfo>>() {
             public void onSuccess(List<HostInfo> hosts) {
+                Console.warning("loadServerGroupsInDomain.success..."+hosts.size());
                 try {
                     Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
                     for (HostInfo host : hosts) {
@@ -140,6 +155,9 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                 } catch (Exception e) {
                     Console.error("Exception after server groups loading", e.getMessage());
                 }
+            }
+            public void onFailure(Throwable caught) {
+                Console.error("loadServerGroupsInDomain() failed", caught.getLocalizedMessage());
             }
         });
 	}
@@ -187,7 +205,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                 }
             }
             public void onFailure(Throwable caught) {
-                Console.error("Failure getting state of server policy", caught.getLocalizedMessage());
+                addServerPolicy(server, policy);
             }
         });
 	}

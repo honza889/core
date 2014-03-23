@@ -17,5 +17,5 @@ domain:
 	$(JBOSS_PATH)/bin/domain.sh
 
 test:
-	mvn clean install
+	cd build/app; mvn gwt:run
 
