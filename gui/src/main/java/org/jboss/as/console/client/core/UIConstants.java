@@ -1119,10 +1119,6 @@ public interface UIConstants extends Constants {
 
     String patch_manager_select_patch_upload();
 
-    String patch_manager_confirm_patch_title();
-
-    String patch_manager_confirm_patch_body();
-
     String patch_manager_update();
 
     String patch_manager_restart_now();
@@ -1160,4 +1156,118 @@ public interface UIConstants extends Constants {
     String patch_manager_rollback_error_select_title();
 
     String patch_manager_rollback_error_select_body();
+
+    String homepage_header_community();
+
+    String homepage_header_product();
+
+    String homepage_sidebar_header();
+
+    String section_configuration_intro();
+
+    String section_runtime_intro();
+
+    String section_domain_intro();
+
+    String section_administration_intro();
+
+    String content_box_create_datasource_title();
+
+    String content_box_new_deployment_title();
+
+    String content_box_new_deployment_link();
+
+    String content_box_apply_patch_title();
+
+    String content_box_role_assignment_title();
+
+    String content_box_role_assignment_link();
+
+    String content_box_create_server_group_title();
+
+    String content_box_create_server_group_link();
+
+    String content_box_topology_title();
+
+    String content_box_topology_link();
+
+    String sidebar_general_resources();
+
+    String sidebar_eap_documentation_text();
+
+    String sidebar_eap_documentation_link();
+
+    String sidebar_learn_more_eap_text();
+
+    String sidebar_learn_more_eap_link();
+
+    String sidebar_trouble_ticket_text();
+
+    String sidebar_trouble_ticket_link();
+
+    String sidebar_training_text();
+
+    String sidebar_training_link();
+
+    String sidebar_developer_resources();
+
+    String sidebar_tutorials_link();
+
+    String sidebar_tutorials_text();
+
+    String sidebar_eap_community_link();
+
+    String sidebar_eap_community_text();
+
+    String sidebar_operational_resources();
+
+    String sidebar_eap_configurations_link();
+
+    String sidebar_eap_configurations_text();
+
+    String sidebar_knowledgebase_link();
+
+    String sidebar_knowledgebase_text();
+
+    String sidebar_consulting_link();
+
+    String sidebar_consulting_text();
+
+    String sidebar_wilfdfly_documentation_text();
+
+    String sidebar_admin_guide_text();
+
+    String sidebar_wildfly_issues_text();
+
+    String sidebar_get_help();
+
+    String sidebar_irc_text();
+
+    String sidebar_user_forums_text();
+
+    String sidebar_developers_mailing_list_text();
+
+    String sidebar_wilfdfly_home_text();
+
+    String sidebar_model_reference_text();
+
+    String sidebar_latest_news();
+
+    String patch_manager_servers_still_running_warning();
+
+    String search_placeholder();
+
+    String search_tooltip_osx();
+
+    String search_tooltip_other();
+
+    String common_label_restart();
+
+    String patch_manager_restart_verify();
+
+    String patch_manager_restart_required();
+
+    String homepage_view_and_manage();
+
+    String homepage_common_tasks();
 }

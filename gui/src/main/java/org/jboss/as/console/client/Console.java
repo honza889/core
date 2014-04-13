@@ -47,6 +47,7 @@ import org.jboss.as.console.client.core.UIMessages;
 import org.jboss.as.console.client.core.bootstrap.EagerLoadGroups;
 import org.jboss.as.console.client.core.bootstrap.EagerLoadHosts;
 import org.jboss.as.console.client.core.bootstrap.EagerLoadProfiles;
+import org.jboss.as.console.client.core.bootstrap.EagerLoadServersOfFirstHost;
 import org.jboss.as.console.client.core.bootstrap.ExecutionMode;
 import org.jboss.as.console.client.core.bootstrap.InsufficientPrivileges;
 import org.jboss.as.console.client.core.bootstrap.LoadCompatMatrix;
@@ -61,6 +62,8 @@ import org.jboss.as.console.client.plugins.RuntimeExtensionRegistry;
 import org.jboss.as.console.client.plugins.SubsystemRegistry;
 import org.jboss.as.console.client.shared.Preferences;
 import org.jboss.as.console.client.shared.help.HelpSystem;
+import org.jboss.as.console.client.shared.state.GlobalHostSelection;
+import org.jboss.as.console.client.shared.state.GlobalServerSelection;
 import org.jboss.as.console.client.shared.state.ReloadNotification;
 import org.jboss.as.console.client.shared.state.ReloadState;
 import org.jboss.as.console.client.shared.state.ServerState;
@@ -109,6 +112,13 @@ public class Console implements EntryPoint, ReloadNotification.Handler {
         ConsoleResources.INSTANCE.prettifyCss().ensureInjected();
         ScriptInjector.fromString(ConsoleResources.INSTANCE.prettifyJs().getText()).setWindow(ScriptInjector.TOP_WINDOW)
                 .inject();
+
+        // inject lunr.js
+        ScriptInjector.fromString(ConsoleResources.INSTANCE.lunrJs().getText()).setWindow(ScriptInjector.TOP_WINDOW)
+                .inject();
+        // inject mousetrap.js
+        ScriptInjector.fromString(ConsoleResources.INSTANCE.mousetrapJs().getText()).setWindow(
+                ScriptInjector.TOP_WINDOW).inject();
 
         // Inject progress polyfill js code
         ProgressPolyfill.inject();
@@ -170,6 +180,15 @@ public class Console implements EntryPoint, ReloadNotification.Handler {
                         // DMR notifications
                         Notifications.addReloadHandler(Console.this);
 
+                        // try to select a host and server instance (necessary for things like indexing)
+                        if (context.getInitialHosts() != null && context.getInitialHosts().getSelectedHost() != null) {
+                            Console.getEventBus().fireEvent(
+                                    new GlobalHostSelection(context.getInitialHosts().getSelectedHost().getName()));
+                        }
+                        if (context.getInitialServer() != null) {
+                            Console.getEventBus().fireEvent(new GlobalServerSelection(context.getInitialServer()));
+                        }
+
                         new LoadMainApp(
                                 MODULES.getBootstrapContext(),
                                 MODULES.getPlaceManager(),
@@ -192,6 +211,7 @@ public class Console implements EntryPoint, ReloadNotification.Handler {
                         new RegisterSubsystems(MODULES.getSubsystemRegistry()),
                         new EagerLoadProfiles(MODULES.getProfileStore(), MODULES.getCurrentSelectedProfile()),
                         new EagerLoadHosts(MODULES.getDomainEntityManager()),
+                        new EagerLoadServersOfFirstHost(MODULES.getDomainEntityManager()),
                         new EagerLoadGroups(MODULES.getServerGroupStore())
                 );
             }

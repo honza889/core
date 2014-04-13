@@ -229,8 +229,6 @@ public interface UIMessages extends Messages {
 
     SafeHtml patch_manager_desc_product();
 
-    String patch_manager_servers_still_running_warning();
-
     String patch_manager_applying_patch_body(String filename);
 
     String patch_manager_restart_needed(String serverOrHost);
@@ -238,4 +236,26 @@ public interface UIMessages extends Messages {
     String patch_manager_error_parse_result(String exception, String payload);
 
     String patch_manager_rolling_back_body(String id);
+
+    SafeHtml content_box_create_datasource_body_standalone();
+
+    SafeHtml content_box_create_datasource_body_domain();
+
+    SafeHtml content_box_new_deployment_body_standalone();
+
+    SafeHtml content_box_new_deployment_body_domain();
+
+    SafeHtml content_box_apply_patch_body_standalone();
+
+    SafeHtml content_box_apply_patch_body_domain();
+
+    SafeHtml content_box_role_assignment_body();
+
+    SafeHtml content_box_create_server_group_body();
+
+    SafeHtml content_box_topology_body();
+
+    SafeHtml search_index_pending();
+
+    String patch_manager_restart_verify(String host);
 }

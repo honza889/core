@@ -19,6 +19,10 @@
 
 package org.jboss.as.console.client.domain.hosts.general;
 
+import static org.jboss.as.console.spi.OperationMode.Mode.DOMAIN;
+
+import java.util.List;
+
 import com.google.gwt.event.logical.shared.CloseEvent;
 import com.google.gwt.event.logical.shared.CloseHandler;
 import com.google.gwt.user.client.ui.PopupPanel;
@@ -29,12 +33,13 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
-import com.gwtplatform.mvp.client.proxy.PlaceManager;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import com.gwtplatform.mvp.client.proxy.RevealContentEvent;
 import org.jboss.as.console.client.core.NameTokens;
 import org.jboss.as.console.client.domain.hosts.HostMgmtPresenter;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
+import org.jboss.as.console.client.rbac.PlaceRequestSecurityFramework;
 import org.jboss.as.console.client.shared.BeanFactory;
 import org.jboss.as.console.client.shared.properties.CreatePropertyCmd;
 import org.jboss.as.console.client.shared.properties.DeletePropertyCmd;
@@ -45,11 +50,10 @@ import org.jboss.as.console.client.shared.properties.PropertyRecord;
 import org.jboss.as.console.client.shared.state.DomainEntityManager;
 import org.jboss.as.console.client.shared.state.HostSelectionChanged;
 import org.jboss.as.console.spi.AccessControl;
+import org.jboss.as.console.spi.OperationMode;
 import org.jboss.ballroom.client.widgets.window.DefaultWindow;
 import org.jboss.dmr.client.ModelNode;
 import org.jboss.dmr.client.dispatch.DispatchAsync;
-
-import java.util.List;
 
 /**
  * @author Heiko Braun
@@ -58,42 +62,38 @@ import java.util.List;
 public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.MyView, HostPropertiesPresenter.MyProxy>
         implements PropertyManagement, HostSelectionChanged.ChangeListener {
 
-    private final PlaceManager placeManager;
-    private BeanFactory factory;
-    private DispatchAsync dispatcher;
-    private DefaultWindow propertyWindow;
-    private final DomainEntityManager domainManager;
-
     @ProxyCodeSplit
     @NameToken(NameTokens.HostPropertiesPresenter)
-    @AccessControl(resources = {
-            "/{selected.host}/system-property=*",
-    })
-    public interface MyProxy extends Proxy<HostPropertiesPresenter>, Place {
-    }
+    @OperationMode(DOMAIN)
+    @AccessControl(resources = {"/{selected.host}/system-property=*",})
+    public interface MyProxy extends Proxy<HostPropertiesPresenter>, Place {}
+
 
     public interface MyView extends View {
+
         void setPresenter(HostPropertiesPresenter presenter);
+
         void setProperties(List<PropertyRecord> properties);
     }
 
+
+    private final DispatchAsync dispatcher;
+    private final DomainEntityManager domainManager;
+    private final BeanFactory factory;
+    private final PlaceRequestSecurityFramework placeRequestSecurityFramework;
+    private DefaultWindow propertyWindow;
+
+
     @Inject
-    public HostPropertiesPresenter(
-            EventBus eventBus, MyView view, MyProxy proxy,
-            PlaceManager placeManager, DispatchAsync dispatcher,
-            BeanFactory factory, DomainEntityManager domainManager) {
+    public HostPropertiesPresenter(EventBus eventBus, MyView view, MyProxy proxy, DispatchAsync dispatcher,
+            BeanFactory factory, DomainEntityManager domainManager,
+            PlaceRequestSecurityFramework placeRequestSecurityFramework) {
         super(eventBus, view, proxy);
 
-        this.placeManager = placeManager;
         this.dispatcher = dispatcher;
         this.domainManager = domainManager;
         this.factory = factory;
-    }
-
-    @Override
-    public void onHostSelectionChanged() {
-        if(isVisible())
-            loadProperties();
+        this.placeRequestSecurityFramework = placeRequestSecurityFramework;
     }
 
     @Override
@@ -101,8 +101,13 @@ public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.M
         super.onBind();
         getView().setPresenter(this);
         getEventBus().addHandler(HostSelectionChanged.TYPE, this);
+        placeRequestSecurityFramework.addCurrentContext(hostPlaceRequest());
     }
 
+    @Override
+    protected void revealInParent() {
+        RevealContentEvent.fire(this, HostMgmtPresenter.TYPE_MainContent, this);
+    }
 
     @Override
     protected void onReset() {
@@ -110,11 +115,22 @@ public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.M
         loadProperties();
     }
 
-    private void loadProperties() {
+    @Override
+    public void onHostSelectionChanged() {
+        if (isVisible()) {
+            placeRequestSecurityFramework.update(this, hostPlaceRequest());
+            loadProperties();
+        }
+    }
 
+    private PlaceRequest hostPlaceRequest() {
+        return new PlaceRequest.Builder().nameToken(getProxy().getNameToken())
+                .with("host", domainManager.getSelectedHost()).build();
+    }
+
+    private void loadProperties() {
         ModelNode address = new ModelNode();
         address.add("host", domainManager.getSelectedHost());
-
         LoadPropertiesCmd loadPropCmd = new LoadPropertiesCmd(dispatcher, factory, address);
         loadPropCmd.execute(new SimpleCallback<List<PropertyRecord>>() {
             @Override
@@ -122,11 +138,6 @@ public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.M
                 getView().setProperties(result);
             }
         });
-    }
-
-    @Override
-    protected void revealInParent() {
-        RevealContentEvent.fire(this, HostMgmtPresenter.TYPE_MainContent, this);
     }
 
     public void closePropertyDialoge() {
@@ -153,11 +164,9 @@ public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.M
         propertyWindow.center();
     }
 
-    public void onCreateProperty(final String groupName, final PropertyRecord prop)
-    {
+    public void onCreateProperty(final String groupName, final PropertyRecord prop) {
 
-        if(propertyWindow!=null && propertyWindow.isShowing())
-        {
+        if (propertyWindow != null && propertyWindow.isShowing()) {
             propertyWindow.hide();
         }
 
@@ -176,8 +185,7 @@ public class HostPropertiesPresenter extends Presenter<HostPropertiesPresenter.M
 
     }
 
-    public void onDeleteProperty(final String groupName, final PropertyRecord prop)
-    {
+    public void onDeleteProperty(final String groupName, final PropertyRecord prop) {
         ModelNode address = new ModelNode();
         address.add("host", domainManager.getSelectedHost());
         address.add("system-property", prop.getKey());

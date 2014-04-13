@@ -72,7 +72,8 @@ public class PatchManager {
         dispatcher.execute(new DMRAction(comp), new AsyncCallback<DMRResponse>() {
             @Override
             public void onFailure(final Throwable caught) {
-                Console.error(Console.CONSTANTS.patch_manager_error(), caught.getMessage());
+                Console.warning(Console.CONSTANTS.patch_manager_error(), caught.getMessage());
+                callback.onSuccess(new Patches());
             }
 
             @Override
@@ -94,13 +95,31 @@ public class PatchManager {
                     ModelNode latestPatchStep = stepsResult.get("step-2");
                     ModelNode latestPatchNode = latestPatchStep.get(RESULT);
                     if (latestPatchNode.isDefined()) {
-                        String id = latestPatchNode.get("cumulative-patch-id").asString();
+                        String id = null;
+                        ModelNode patchesNode = latestPatchNode.get("patches");
+                        if (patchesNode.isDefined()) {
+                            List<ModelNode> idList = patchesNode.asList();
+                            if (!idList.isEmpty()) {
+                                id = idList.get(0).asString(); // TODO first == latest?
+                            }
+                        }
+                        if (id == null) {
+                            id = latestPatchNode.get("cumulative-patch-id").asString();
+                        }
                         patches.setLatest(id);
 
                         String version = latestPatchNode.get("version").asString();
                         if (patches.getLatest() != null) {
                             patches.getLatest().setVersion(version);
                         }
+                    }
+
+                    ModelNode headersNode = result.get("response-headers");
+                    if (headersNode.isDefined()) {
+                        ModelNode stateNode = headersNode.get("process-state");
+                        patches.setRestartRequired("restart-required".equals(stateNode.asString()));
+                    } else {
+                        patches.setRestartRequired(false);
                     }
                 }
                 callback.onSuccess(patches);

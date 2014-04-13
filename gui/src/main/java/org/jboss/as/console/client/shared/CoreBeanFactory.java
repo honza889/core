@@ -29,6 +29,7 @@ import org.jboss.as.console.client.domain.model.ProfileRecord;
 import org.jboss.as.console.client.domain.model.Server;
 import org.jboss.as.console.client.domain.model.ServerGroupRecord;
 import org.jboss.as.console.client.domain.model.ServerInstance;
+import org.jboss.as.console.client.search.Document;
 import org.jboss.as.console.client.shared.deployment.DeploymentReference;
 import org.jboss.as.console.client.shared.deployment.model.DeployedEjb;
 import org.jboss.as.console.client.shared.deployment.model.DeployedEndpoint;
@@ -227,6 +228,7 @@ public interface CoreBeanFactory {
     AutoBean<MessagingProvider> messagingProvider();
     AutoBean<SecurityPattern> messagingSecurity();
     AutoBean<AddressingPattern> messagingAddress();
+    AutoBean<Document> indexDocument();
 
     AutoBean<HttpConnector> httpConnector();
     AutoBean<JSPContainerConfiguration> jspConfig();

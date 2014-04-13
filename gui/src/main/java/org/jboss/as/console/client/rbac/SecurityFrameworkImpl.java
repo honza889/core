@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import com.allen_sauer.gwt.log.client.Log;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.web.bindery.event.shared.EventBus;
 import org.jboss.as.console.client.Console;
 import org.jboss.as.console.client.core.BootstrapContext;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
@@ -21,6 +22,9 @@ import org.jboss.as.console.client.plugins.AccessControlRegistry;
 import org.jboss.as.console.mbui.behaviour.CoreGUIContext;
 import org.jboss.as.console.mbui.model.mapping.AddressMapping;
 import org.jboss.ballroom.client.rbac.SecurityContext;
+import org.jboss.ballroom.client.rbac.SecurityContextAware;
+import org.jboss.ballroom.client.rbac.SecurityContextChangedEvent;
+import org.jboss.ballroom.client.rbac.SecurityContextChangedHandler;
 import org.jboss.dmr.client.ModelNode;
 import org.jboss.dmr.client.ModelType;
 import org.jboss.dmr.client.Property;
@@ -35,9 +39,8 @@ import org.useware.kernel.gui.behaviour.FilteringStatementContext;
  * @see com.gwtplatform.mvp.client.proxy.PlaceManager
  *
  * @author Heiko Braun
- * @date 7/3/13
  */
-public class SecurityFrameworkImpl implements SecurityFramework {
+public class SecurityFrameworkImpl implements SecurityFramework, SecurityContextChangedHandler {
 
 
     private static final String MODEL_DESCRIPTION = "model-description";
@@ -54,35 +57,40 @@ public class SecurityFrameworkImpl implements SecurityFramework {
     protected final AccessControlRegistry accessControlMetaData;
     protected final DispatchAsync dispatcher;
     protected final CoreGUIContext statementContext;
+    protected final CoreGUIContext coreGUIContext;
     protected final ContextKeyResolver keyResolver;
+
     private final FilteringStatementContext filteringStatementContext;
+    private final Map<String, SecurityContextAware> contextAwareWidgets;
 
     protected Map<String, SecurityContext> contextMapping = new HashMap<String, SecurityContext>();
 
     private final static SecurityContext READ_ONLY  = new ReadOnlyContext();
 
     @Inject
-    public SecurityFrameworkImpl(
-            AccessControlRegistry accessControlMetaData,
-            DispatchAsync dispatcher,
-            CoreGUIContext statementContext, final BootstrapContext bootstrap) {
+    public SecurityFrameworkImpl(AccessControlRegistry accessControlMetaData, DispatchAsync dispatcher,
+            CoreGUIContext statementContext, final BootstrapContext bootstrap, EventBus eventBus,
+            CoreGUIContext coreGUIContext) {
+
         this.accessControlMetaData = accessControlMetaData;
         this.dispatcher = dispatcher;
         this.statementContext = statementContext;
+        this.coreGUIContext = coreGUIContext;
         this.keyResolver = new PlaceSecurityResolver();
-
+        this.contextAwareWidgets = new HashMap<String, SecurityContextAware>();
         this.filteringStatementContext = new FilteringStatementContext(
                 statementContext,
                 new FilteringStatementContext.Filter() {
                     @Override
                     public String filter(String key) {
-
-                        if ("selected.entity".equals(key)) {
+                        if (key.equals("selected.entity")) {
                             return "*";
-                        } else if ("addressable.group".equals(key)) {
-                            return bootstrap.getAddressableGroups().isEmpty() ? "*" : bootstrap.getAddressableGroups().iterator().next();
-                        } else if ("addressable.host".equals(key)) {
-                            return bootstrap.getAddressableHosts().isEmpty() ? "*" : bootstrap.getAddressableHosts().iterator().next();
+                        } else if (key.equals("addressable.group")) {
+                            return bootstrap.getAddressableGroups().isEmpty() ? "*" : bootstrap
+                                    .getAddressableGroups().iterator().next();
+                        } else if (key.equals("addressable.host")) {
+                            return bootstrap.getAddressableHosts().isEmpty() ? "*" : bootstrap.getAddressableHosts()
+                                    .iterator().next();
                         } else {
                             return null;
                         }
@@ -94,6 +102,8 @@ public class SecurityFrameworkImpl implements SecurityFramework {
                     }
                 }
         );
+
+        SecurityContextChangedEvent.register(eventBus, this);
     }
 
     @Override
@@ -108,12 +118,59 @@ public class SecurityFrameworkImpl implements SecurityFramework {
 
     @Override
     public SecurityContext getSecurityContext(String id) {
-
-        SecurityContext securityContext = contextMapping.get(id);
-        return securityContext;
+        return contextMapping.get(id);
     }
 
+    @Override
+    public void registerWidget(final String id, final SecurityContextAware widget) {
+        contextAwareWidgets.put(id, widget);
+    }
 
+    @Override
+    public void unregisterWidget(final String id) {
+        contextAwareWidgets.remove(id);
+    }
+
+    @Override
+    public void onSecurityContextChanged(final SecurityContextChangedEvent event) {
+        SecurityContext context = event.getSecurityContext();
+        String addressTemplate = event.getResourceAddress();
+        System.out.println("<SCC>");
+
+        if (context == null) {
+            // address resolution
+            ModelNode addressNode = AddressMapping.fromString(addressTemplate).asResource(coreGUIContext,
+                    event.getWildcards());
+            String resourceAddress = normalize(addressNode.get(ADDRESS));
+            System.out.println(
+                    "\tReceiving security context change event for " + addressTemplate + " -> " + resourceAddress);
+
+            // look for child context
+            context = getSecurityContext();
+            if (context.hasChildContext(resourceAddress)) {
+                System.out.println("\tFound child context for " + resourceAddress);
+                context = context.getChildContext(resourceAddress);
+            }
+        } else {
+            System.out.println("\tReceiving security context change event for " + context);
+        }
+
+        // update widgets (if visible and filter applies)
+        for (Map.Entry<String, SecurityContextAware> entry : contextAwareWidgets.entrySet()) {
+            String id = entry.getKey();
+            SecurityContextAware widget = entry.getValue();
+
+            boolean update = true;
+            if (widget.getFilter() != null) {
+                update = widget.getFilter().equals(addressTemplate);
+            }
+            if (update && widget.isAttached()) {
+                System.out.println("\tUpdating widget " + id);
+                widget.updateSecurityContext(context);
+            }
+        }
+        System.out.println("</SCC>\n");
+    }
 
     public void createSecurityContext(final String id, final AsyncCallback<SecurityContext> callback) {
         createSecurityContext(id, accessControlMetaData.getResources(id),  accessControlMetaData.isRecursive(id), callback);
@@ -156,8 +213,8 @@ public class SecurityFrameworkImpl implements SecurityFramework {
 
         for(ResourceRef ref : references)
         {
-
-            ModelNode step = AddressMapping.fromString(ref.address).asResource(filteringStatementContext);
+            ModelNode emptyAddress = new ModelNode().setEmptyList();
+            ModelNode step = AddressMapping.fromString(ref.address).asResource(emptyAddress, filteringStatementContext);
 
             step2address.put("step-" + (steps.size() + 1), ref);   // we need this for later retrieval
 
@@ -236,8 +293,9 @@ public class SecurityFrameworkImpl implements SecurityFramework {
 
                             // break down the address into something we can match against the response
                             final ResourceRef ref = step2address.get(step);
-                            final ModelNode addressNode = AddressMapping.fromString(ref.address).asResource(filteringStatementContext);
-                            final List<ModelNode> inquiryAdress = addressNode.get(ADDRESS).asList();
+                            ModelNode emptyAddress = new ModelNode().setEmptyList();
+                            final ModelNode addressNode = AddressMapping.fromString(ref.address).asResource(emptyAddress, filteringStatementContext);
+                            final List<ModelNode> inquiryAddress = addressNode.get(ADDRESS).asList();
 
                             ModelNode stepResult = overalResult.get(step).get(RESULT);
 
@@ -254,7 +312,7 @@ public class SecurityFrameworkImpl implements SecurityFramework {
                                     List<ModelNode> responseAddress = node.get(ADDRESS).asList();
 
                                     // match the inquiry
-                                    if(matchingAdress(responseAddress, inquiryAdress))
+                                    if(matchingAddress(responseAddress, inquiryAddress))
                                     {
                                         payload = node;
                                         break;
@@ -294,7 +352,7 @@ public class SecurityFrameworkImpl implements SecurityFramework {
         });
     }
 
-    private static boolean matchingAdress(List<ModelNode> responseAddress, List<ModelNode> inquiryAdress) {
+    private static boolean matchingAddress(List<ModelNode> responseAddress, List<ModelNode> inquiryAdress) {
 
         int numMatchingTokens = 0;
         int offset = inquiryAdress.size()-responseAddress.size();
@@ -338,38 +396,48 @@ public class SecurityFrameworkImpl implements SecurityFramework {
         }
     }
 
-    private static void parseAccessControlMetaData(final ResourceRef ref, SecurityContextImpl context, ModelNode payload) {
+    private static void parseAccessControlMetaData(final ResourceRef ref, SecurityContextImpl context,
+            ModelNode payload) {
 
         ModelNode accessControl = payload.get(ACCESS_CONTROL);
+        if (accessControl.isDefined() && accessControl.hasDefined(DEFAULT)) {
 
-        if(accessControl.isDefined() && accessControl.hasDefined(DEFAULT))
-        {
             // default policy for requested resource type
             Constraints defaultConstraints = parseConstraints(ref, accessControl.get(DEFAULT));
-            if(ref.optional)
+            if (ref.optional) {
                 context.setOptionalConstraints(ref.address, defaultConstraints);
-            else
+            } else {
                 context.setConstraints(ref.address, defaultConstraints);
-
-            // exceptions (instances) of requested resource type
-            if(accessControl.hasDefined(EXCEPTIONS))
-            {
-
-                // TODO: API V3 -> https://issues.jboss.org/browse/HAL-259
-
-                /*for(Property exception : accessControl.get(EXCEPTIONS).asPropertyList())
-                {
-                    // TODO: AddressMapping compatible expression
-                    // See https://issues.jboss.org/browse/WFLY-2263
-                    ResourceRef exceptionRef = new ResourceRef(exception.getName());
-                    Constraints instanceConstraints = parseConstraints(exceptionRef, exception.getValue());
-
-                    // TODO: child context wiring
-                    System.out.println("child context: "+instanceConstraints.getResourceAddress());
-                } */
             }
 
+            // exceptions (instances) of requested resource type
+            if (accessControl.hasDefined(EXCEPTIONS)) {
+                for (Property exception : accessControl.get(EXCEPTIONS).asPropertyList()) {
+                    ModelNode addressNode = exception.getValue().get(ADDRESS);
+                    String address = normalize(addressNode);
+                    if (address != null) {
+                        ResourceRef exceptionRef = new ResourceRef(address);
+                        Constraints instanceConstraints = parseConstraints(exceptionRef, exception.getValue());
+                        context.addChildContext(address, instanceConstraints);
+                    } else {
+                        Log.error("Skip exception " + exception.getName() + ": No address found in " + exception
+                                .getValue());
+                    }
+                }
+            }
         }
+    }
+
+    private static String normalize(final ModelNode address) {
+        if (address.isDefined()) {
+            StringBuilder normalized = new StringBuilder();
+            List<Property> properties = address.asPropertyList();
+            for (Property property : properties) {
+                normalized.append("/").append(property.getName()).append("=").append(property.getValue().asString());
+            }
+            return normalized.toString();
+        }
+        return null;
     }
 
     private static Constraints parseConstraints(final ResourceRef ref, ModelNode policyModel) {
@@ -377,46 +445,33 @@ public class SecurityFrameworkImpl implements SecurityFramework {
         Constraints constraints = new Constraints(ref.address);
 
         // resource constraints
-        if(policyModel.hasDefined(ADDRESS)
-                && policyModel.get(ADDRESS).asBoolean()==false)
-        {
+        if (policyModel.hasDefined(ADDRESS) && !policyModel.get(ADDRESS).asBoolean()) {
             constraints.setAddress(false);
-        }
-        else
-        {
-
+        } else {
             constraints.setReadResource(policyModel.get(READ).asBoolean());
             constraints.setWriteResource(policyModel.get(WRITE).asBoolean());
         }
 
         // operation constraints
-        if(policyModel.hasDefined(OPERATIONS))
-        {
+        if (policyModel.hasDefined(OPERATIONS)) {
             List<Property> operations = policyModel.get(OPERATIONS).asPropertyList();
-            for(Property op : operations)
-            {
+            for (Property op : operations) {
                 ModelNode opConstraintModel = op.getValue();
                 constraints.setOperationExec(ref.address, op.getName(), opConstraintModel.get(EXECUTE).asBoolean());
             }
-
         }
 
         // attribute constraints
-        if(policyModel.hasDefined(ATTRIBUTES))
-        {
+        if (policyModel.hasDefined(ATTRIBUTES)) {
             List<Property> attributes = policyModel.get(ATTRIBUTES).asPropertyList();
 
-            for(Property att : attributes)
-            {
+            for (Property att : attributes) {
                 ModelNode attConstraintModel = att.getValue();
                 constraints.setAttributeRead(att.getName(), attConstraintModel.get(READ).asBoolean());
                 constraints.setAttributeWrite(att.getName(), attConstraintModel.get(WRITE).asBoolean());
-
             }
         }
-
         return constraints;
-
     }
 
     @Override
@@ -429,7 +484,7 @@ public class SecurityFrameworkImpl implements SecurityFramework {
 
         // Fallback
         if(type == Object.class || type == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
 
         return new MetaDataAdapter(Console.MODULES.getApplicationMetaData())
                 .getReadOnlyJavaNames(type, securityContext);
@@ -440,7 +495,7 @@ public class SecurityFrameworkImpl implements SecurityFramework {
 
         // Fallback
         if(type == Object.class || type == null)
-            return Collections.EMPTY_SET;
+            return Collections.emptySet();
 
         return new MetaDataAdapter(Console.MODULES.getApplicationMetaData())
                 .getReadOnlyJavaNames(type, resourceAddress, securityContext);
@@ -458,9 +513,4 @@ public class SecurityFrameworkImpl implements SecurityFramework {
         }
         return readOnly;
     }
-
-
-
 }
-
-

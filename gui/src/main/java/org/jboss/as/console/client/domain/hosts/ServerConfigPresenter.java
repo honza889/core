@@ -19,6 +19,13 @@
 
 package org.jboss.as.console.client.domain.hosts;
 
+import static org.jboss.as.console.spi.OperationMode.Mode.DOMAIN;
+import static org.jboss.dmr.client.ModelDescriptionConstants.*;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
@@ -63,6 +70,8 @@ import org.jboss.as.console.client.shared.util.DMRUtil;
 import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
 import org.jboss.as.console.client.widgets.forms.PropertyBinding;
 import org.jboss.as.console.spi.AccessControl;
+import org.jboss.as.console.spi.OperationMode;
+import org.jboss.ballroom.client.rbac.SecurityContextChangedEvent;
 import org.jboss.ballroom.client.widgets.window.DefaultWindow;
 import org.jboss.dmr.client.ModelDescriptionConstants;
 import org.jboss.dmr.client.ModelNode;
@@ -70,19 +79,13 @@ import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.impl.DMRAction;
 import org.jboss.dmr.client.dispatch.impl.DMRResponse;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import static org.jboss.dmr.client.ModelDescriptionConstants.*;
-
 /**
  * @author Heiko Braun
  * @date 3/3/11
  */
 public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyView, ServerConfigPresenter.MyProxy>
-        implements  ServerWizardEvent.ServerWizardListener,
-        JvmManagement, PropertyManagement, HostSelectionChanged.ChangeListener {
+        implements ServerWizardEvent.ServerWizardListener, JvmManagement, PropertyManagement,
+        HostSelectionChanged.ChangeListener {
 
     private HostInformationStore hostInfoStore;
     private ServerGroupStore serverGroupStore;
@@ -102,34 +105,41 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
     @ProxyCodeSplit
     @NameToken(NameTokens.ServerPresenter)
+    @OperationMode(DOMAIN)
     @AccessControl(resources = {
             "/{selected.host}/server-config=*",
             "opt://{selected.host}/server-config=*/system-property=*"
     }, recursive = false)
     public interface MyProxy extends Proxy<ServerConfigPresenter>, Place {
+
+
     }
 
     public interface MyView extends SuspendableView {
+
         void setPresenter(ServerConfigPresenter presenter);
+
         void updateSocketBindings(List<String> result);
+
         void setJvm(String reference, Jvm jvm);
+
         void setProperties(String reference, List<PropertyRecord> properties);
+
         void setPorts(String socketBinding, Server selectedRecord, List<SocketBinding> result);
+
         void setConfigurations(ServerConfigList serverList);
 
         void setGroups(List<ServerGroupRecord> result);
 
         void setPreselection(String config);
+
     }
 
     @Inject
-    public ServerConfigPresenter(
-            EventBus eventBus, MyView view, MyProxy proxy,
-            HostInformationStore hostInfoStore,
-            ServerGroupStore serverGroupStore,
-            DispatchAsync dispatcher,
-            ApplicationMetaData propertyMetaData, BeanFactory factory,
-            PlaceManager placeManager, DomainEntityManager domainManager) {
+    public ServerConfigPresenter(EventBus eventBus, MyView view, MyProxy proxy, HostInformationStore hostInfoStore,
+            ServerGroupStore serverGroupStore, DispatchAsync dispatcher, ApplicationMetaData propertyMetaData,
+            BeanFactory factory, PlaceManager placeManager, DomainEntityManager domainManager) {
+
         super(eventBus, view, proxy);
 
         this.hostInfoStore = hostInfoStore;
@@ -139,10 +149,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         this.factory = factory;
         this.placeManager = placeManager;
         this.domainManager = domainManager;
-
-        this.loadSocketCmd = new LoadSocketBindingsCmd(
-                dispatcher, factory, propertyMetaData
-        );
+        this.loadSocketCmd = new LoadSocketBindingsCmd(dispatcher, factory, propertyMetaData);
     }
 
     @Override
@@ -155,14 +162,10 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
     @Override
     public void prepareFromRequest(PlaceRequest request) {
-
-        String action= request.getParameter("action", null);
-
-        if("new".equals(action))
-        {
+        String action = request.getParameter("action", null);
+        if ("new".equals(action)) {
             launchNewConfigDialoge();
         }
-
         getView().setPreselection(request.getParameter("config", null));
     }
 
@@ -171,13 +174,25 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         super.onReset();
 
         // step1
-        if(placeManager.getCurrentPlaceRequest().getNameToken().equals(getProxy().getNameToken()))
+        if (placeManager.getCurrentPlaceRequest().getNameToken().equals(getProxy().getNameToken())) {
             loadSocketBindings();
+        }
     }
 
     @Override
     public void onHostSelectionChanged() {
         onReset();
+    }
+
+    public void onServerConfigSelectionChanged(final Server server) {
+        if (server != null) {
+            loadJVMConfiguration(server);
+            loadProperties(server);
+            loadPorts(server);
+
+            SecurityContextChangedEvent
+                    .fire(this, "/{selected.host}/server-config=*", server.getName());
+        }
     }
 
     private void loadSocketBindings() {
@@ -193,7 +208,6 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
     }
 
     private void loadServerConfigurations() {
-
         domainManager.getHosts(new SimpleCallback<HostList>() {
             @Override
             public void onSuccess(HostList hostList) {
@@ -213,7 +227,6 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
                 getView().setGroups(result);
             }
         });
-
     }
 
 
@@ -245,8 +258,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
     }
 
     public void closeDialoge() {
-        if(window!=null && window.isShowing())
-        {
+        if (window != null && window.isShowing()) {
             window.hide();
         }
     }
@@ -281,7 +293,8 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
             public void onFailure(Throwable caught) {
 
                 Console.getMessageCenter().notify(
-                        new Message(Console.MESSAGES.addingFailed("Server Configuration ") + newServer.getName(), Message.Severity.Error)
+                        new Message(Console.MESSAGES.addingFailed("Server Configuration ") + newServer.getName(),
+                                Message.Severity.Error)
                 );
 
             }
@@ -297,11 +310,9 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
         //System.out.println(changedValues);
 
-        if(changedValues.containsKey("portOffset"))
-            changedValues.put("socketBinding", entity.getSocketBinding());
+        if (changedValues.containsKey("portOffset")) { changedValues.put("socketBinding", entity.getSocketBinding()); }
 
-        if(changedValues.containsKey("socketBinding"))
-            changedValues.put("portOffset", entity.getPortOffset());
+        if (changedValues.containsKey("socketBinding")) { changedValues.put("portOffset", entity.getPortOffset()); }
 
         final String name = entity.getName();
 
@@ -311,7 +322,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         proto.get(ADDRESS).add(ModelDescriptionConstants.SERVER_CONFIG, name);
 
         List<PropertyBinding> bindings = propertyMetaData.getBindingsForType(Server.class);
-        ModelNode operation  = ModelAdapter.detypedFromChangeset(proto, changedValues, bindings);
+        ModelNode operation = ModelAdapter.detypedFromChangeset(proto, changedValues, bindings);
 
         // TODO: https://issues.jboss.org/browse/AS7-3643
 
@@ -321,14 +332,12 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
             public void onSuccess(DMRResponse result) {
                 ModelNode response = result.get();
 
-                if(response.isFailure())
-                {
-                    Console.error(Console.MESSAGES.modificationFailed("Server Configuration ") +name, response.getFailureDescription());
+                if (response.isFailure()) {
+                    Console.error(Console.MESSAGES.modificationFailed("Server Configuration ") + name,
+                            response.getFailureDescription());
 
-                }
-                else
-                {
-                    Console.info(Console.MESSAGES.modified("Server Configuration ") +name);
+                } else {
+                    Console.info(Console.MESSAGES.modified("Server Configuration ") + name);
                 }
 
                 loadServerConfigurations();
@@ -364,18 +373,16 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
                 Boolean serverIsRunning = outcome.equals(SUCCESS) ? Boolean.TRUE : Boolean.FALSE; // 1.5.x
 
                 // 2.0.x
-                if(outcome.equals(SUCCESS))
-                {
+                if (outcome.equals(SUCCESS)) {
                     serverIsRunning = response.get(RESULT).get("server-state").asString().equalsIgnoreCase("running");
                 }
 
-                if(!serverIsRunning)
-                    performDeleteOperation(server);
-                else
+                if (!serverIsRunning) { performDeleteOperation(server); } else {
                     Console.error(
                             Console.MESSAGES.deletionFailed("Server Configuration"),
                             Console.MESSAGES.server_config_stillRunning(server.getName())
                     );
+                }
             }
         });
 
@@ -388,21 +395,19 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
             @Override
             public void onFailure(Throwable caught) {
                 Console.getMessageCenter().notify(
-                        new Message(Console.MESSAGES.deletionFailed("Server Configuration ")+server.getName(), Message.Severity.Error)
+                        new Message(Console.MESSAGES.deletionFailed("Server Configuration ") + server.getName(),
+                                Message.Severity.Error)
                 );
             }
 
             @Override
             public void onSuccess(Boolean wasSuccessful) {
-                if(wasSuccessful)
-                {
-                    Console.info(Console.MESSAGES.deleted("Server Configuration ")+server.getName());
+                if (wasSuccessful) {
+                    Console.info(Console.MESSAGES.deleted("Server Configuration ") + server.getName());
 
                     loadServerConfigurations();
-                }
-                else
-                {
-                    Console.error(Console.MESSAGES.deletionFailed("Server Configuration ")+server.getName());
+                } else {
+                    Console.error(Console.MESSAGES.deletionFailed("Server Configuration ") + server.getName());
                 }
 
                 staleModel();
@@ -454,8 +459,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
     @Override
     public void onUpdateJvm(String reference, String jvmName, Map<String, Object> changedValues) {
 
-        if(changedValues.size()>0)
-        {
+        if (changedValues.size() > 0) {
             ModelNode address = new ModelNode();
             address.add("host", domainManager.getSelectedHost());
             address.add("server-config", reference);
@@ -474,8 +478,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
     @Override
     public void onCreateProperty(String reference, final PropertyRecord prop) {
-        if(propertyWindow!=null && propertyWindow.isShowing())
-        {
+        if (propertyWindow != null && propertyWindow.isShowing()) {
             propertyWindow.hide();
         }
 
@@ -503,7 +506,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         address.add("system-property", prop.getKey());
         final String selectedConfigName = reference;
 
-        DeletePropertyCmd cmd = new DeletePropertyCmd(dispatcher,factory,address);
+        DeletePropertyCmd cmd = new DeletePropertyCmd(dispatcher, factory, address);
         cmd.execute(prop, new SimpleCallback<Boolean>() {
             @Override
             public void onSuccess(Boolean result) {
@@ -538,9 +541,8 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
     public void loadPorts(final Server server) {
 
-        if(server.getSocketBinding()!=null &&
-                !server.getSocketBinding().equals(""))
-        {
+        if (server.getSocketBinding() != null &&
+                !server.getSocketBinding().equals("")) {
 
             loadSocketCmd.execute(server.getSocketBinding(),
                     new SimpleCallback<List<SocketBinding>>() {
@@ -564,19 +566,19 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         hostInfoStore.loadJVMConfiguration(domainManager.getSelectedHost(), server, new SimpleCallback<Jvm>() {
             @Override
             public void onSuccess(Jvm jvm) {
-
-                getView().setJvm(server.getName(), jvm);
+            getView().setJvm(server.getName(), jvm);
             }
         });
     }
 
     public void loadProperties(final Server server) {
-        hostInfoStore.loadProperties(domainManager.getSelectedHost(), server, new SimpleCallback<List<PropertyRecord>>() {
-            @Override
-            public void onSuccess(List<PropertyRecord> properties) {
-                getView().setProperties(server.getName(), properties);
-            }
-        });
+        hostInfoStore
+                .loadProperties(domainManager.getSelectedHost(), server, new SimpleCallback<List<PropertyRecord>>() {
+                    @Override
+                    public void onSuccess(List<PropertyRecord> properties) {
+                    getView().setProperties(server.getName(), properties);
+                    }
+                });
     }
 
     public void onLaunchCopyWizard(final Server orig) {
@@ -591,7 +593,8 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
             public void onSuccess(List<Host> result) {
 
                 window.trapWidget(
-                        new CopyServerWizard(ServerConfigPresenter.this, orig, result, domainManager.getSelectedHost()).asWidget()
+                        new CopyServerWizard(ServerConfigPresenter.this, orig, result, domainManager.getSelectedHost())
+                                .asWidget()
                 );
 
                 window.setGlassEnabled(true);
@@ -614,7 +617,7 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
         dispatcher.execute(new DMRAction(operation, false), new AsyncCallback<DMRResponse>() {
             @Override
             public void onFailure(Throwable caught) {
-                Console.error("Failed to read server-config: "+original.getName(), caught.getMessage());
+                Console.error("Failed to read server-config: " + original.getName(), caught.getMessage());
             }
 
             @Override
@@ -622,12 +625,10 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
                 ModelNode response = result.get();
 
-                if(response.isFailure())
-                {
-                    Console.error("Failed to read server-config: "+original.getName(), response.getFailureDescription());
-                }
-                else
-                {
+                if (response.isFailure()) {
+                    Console.error("Failed to read server-config: " + original.getName(),
+                            response.getFailureDescription());
+                } else {
                     ModelNode model = response.get("result").asObject();
 
                     // required attribute changes: portOffset & serverGroup
@@ -658,13 +659,10 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
                         public void onSuccess(DMRResponse dmrResponse) {
                             ModelNode response = dmrResponse.get();
 
-                            if(response.isFailure())
-                            {
+                            if (response.isFailure()) {
                                 Console.error("Failed to copy server-config", response.getFailureDescription());
-                            }
-                            else
-                            {
-                                Console.info("Successfully copied server-config '"+newServer.getName()+"'");
+                            } else {
+                                Console.info("Successfully copied server-config '" + newServer.getName() + "'");
                             }
 
                             loadServerConfigurations();
@@ -678,6 +676,4 @@ public class ServerConfigPresenter extends Presenter<ServerConfigPresenter.MyVie
 
         });
     }
-
-
 }

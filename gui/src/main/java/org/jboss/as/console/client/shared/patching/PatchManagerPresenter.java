@@ -35,11 +35,13 @@ import com.gwtplatform.mvp.client.View;
 import com.gwtplatform.mvp.client.annotations.NameToken;
 import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
+import com.gwtplatform.mvp.client.proxy.PlaceRequest;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 import org.jboss.as.console.client.Console;
 import org.jboss.as.console.client.core.BootstrapContext;
 import org.jboss.as.console.client.core.NameTokens;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
+import org.jboss.as.console.client.rbac.PlaceRequestSecurityFramework;
 import org.jboss.as.console.client.shared.flow.TimeoutOperation;
 import org.jboss.as.console.client.shared.patching.ui.RestartModal;
 import org.jboss.as.console.client.shared.patching.wizard.CommonPatchContext;
@@ -48,6 +50,7 @@ import org.jboss.as.console.client.shared.patching.wizard.apply.ApplyWizard;
 import org.jboss.as.console.client.shared.patching.wizard.rollback.RollbackContext;
 import org.jboss.as.console.client.shared.patching.wizard.rollback.RollbackWizard;
 import org.jboss.as.console.client.shared.state.DomainEntityManager;
+import org.jboss.as.console.client.shared.state.HostSelectionChanged;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
 import org.jboss.as.console.spi.AccessControl;
 import org.jboss.ballroom.client.widgets.window.DefaultWindow;
@@ -60,22 +63,74 @@ import org.jboss.dmr.client.dispatch.impl.DMRResponse;
 /**
  * @author Harald Pehl
  */
-public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyView, PatchManagerPresenter.MyProxy> {
+public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyView, PatchManagerPresenter.MyProxy>
+        implements HostSelectionChanged.ChangeListener {
+
+    @ProxyCodeSplit
+    @NameToken(NameTokens.PatchingPresenter)
+    @AccessControl(resources = {"/{selected.host}", // in order to enable / disable the shutdown operation
+            "/{selected.host}/core-service=patching"}, recursive = false)
+    public interface MyProxy extends Proxy<PatchManagerPresenter>, Place {}
+
+
+    public interface MyView extends View {
+
+        void setPresenter(PatchManagerPresenter presenter);
+
+        void update(Patches patches);
+    }
+
+
+    private abstract class GetRunningServersCallback implements AsyncCallback<DMRResponse> {
+
+        private final Callback<? extends CommonPatchContext, Throwable> contextCallback;
+
+        public GetRunningServersCallback(final Callback<? extends CommonPatchContext, Throwable> contextCallback) {
+            this.contextCallback = contextCallback;
+        }
+
+        @Override
+        public void onSuccess(DMRResponse result) {
+            ModelNode response = result.get();
+            List<String> runningServers = new LinkedList<String>();
+            if (!response.isFailure()) {
+                List<Property> servers = response.get(RESULT).asPropertyList();
+                for (Property server : servers) {
+                    String name = server.getName();
+                    ModelNode instance = server.getValue();
+                    String state = instance.get("server-state").asString();
+                    if ("running".equals(state)) {
+                        runningServers.add(name);
+                    }
+                }
+            }
+            onServers(runningServers);
+        }
+
+        @Override
+        public void onFailure(final Throwable caught) {
+            onServers(Collections.<String>emptyList());
+        }
+
+        protected abstract void onServers(List<String> runningServers);
+    }
+
 
     static final int NORMAL_WINDOW_HEIGHT = 400;
     static final int BIGGER_WINDOW_HEIGHT = NORMAL_WINDOW_HEIGHT + 100;
-
     private final RevealStrategy revealStrategy;
     private final PatchManager patchManager;
     private final DomainEntityManager domainManager;
     private final BootstrapContext bootstrapContext;
     private final DispatchAsync dispatcher;
+    private final PlaceRequestSecurityFramework placeRequestSecurityFramework;
     private DefaultWindow window;
 
     @Inject
     public PatchManagerPresenter(final EventBus eventBus, final MyView view, final MyProxy proxy,
-            RevealStrategy revealStrategy, PatchManager patchManager, final DomainEntityManager domainManager,
-            BootstrapContext bootstrapContext, DispatchAsync dispatcher) {
+            final RevealStrategy revealStrategy, final PatchManager patchManager,
+            final DomainEntityManager domainManager, final BootstrapContext bootstrapContext,
+            final DispatchAsync dispatcher, final PlaceRequestSecurityFramework placeRequestSecurityFramework) {
 
         super(eventBus, view, proxy);
         this.revealStrategy = revealStrategy;
@@ -83,18 +138,40 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
         this.domainManager = domainManager;
         this.bootstrapContext = bootstrapContext;
         this.dispatcher = dispatcher;
+        this.placeRequestSecurityFramework = placeRequestSecurityFramework;
     }
 
     @Override
     protected void onBind() {
         super.onBind();
         getView().setPresenter(this);
+        getEventBus().addHandler(HostSelectionChanged.TYPE, this);
+        if (!bootstrapContext.isStandalone()) {
+            placeRequestSecurityFramework.addCurrentContext(hostPlaceRequest());
+        }
+    }
+
+    @Override
+    protected void revealInParent() {
+        if (bootstrapContext.isStandalone()) {
+            revealStrategy.revealInRuntimeParent(this);
+        } else {
+            revealStrategy.revealInDomain(this);
+        }
     }
 
     @Override
     protected void onReset() {
         super.onReset();
         loadPatches();
+    }
+
+    @Override
+    public void onHostSelectionChanged() {
+        if (isVisible()) {
+            placeRequestSecurityFramework.update(this, hostPlaceRequest());
+            loadPatches();
+        }
     }
 
     public void loadPatches() {
@@ -106,9 +183,9 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
         });
     }
 
-    @Override
-    protected void revealInParent() {
-        revealStrategy.revealInRuntimeParent(this);
+    private PlaceRequest hostPlaceRequest() {
+        return new PlaceRequest.Builder().nameToken(getProxy().getNameToken())
+                .with("host", domainManager.getSelectedHost()).build();
     }
 
     public void launchApplyWizard() {
@@ -126,8 +203,8 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
                 window = new DefaultWindow(Console.CONSTANTS.patch_manager_apply_patch());
                 window.setWidth(480);
                 window.setHeight(NORMAL_WINDOW_HEIGHT);
-                window.setWidget(new ApplyWizard(PatchManagerPresenter.this, context,
-                        Console.CONSTANTS.patch_manager_apply_patch(), dispatcher, patchManager));
+                window.trapWidget(new ApplyWizard(PatchManagerPresenter.this, context,
+                        Console.CONSTANTS.patch_manager_apply_patch(), dispatcher, patchManager).asWidget());
                 window.setGlassEnabled(true);
                 window.center();
             }
@@ -137,7 +214,8 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
             contextCallback
                     .onSuccess(new ApplyContext(true, null, Collections.<String>emptyList(), patchManager.baseAddress(),
                             bootstrapContext.getProperty(
-                                    BootstrapContext.PATCH_API)));
+                                    BootstrapContext.PATCH_API)
+                    ));
         } else {
             final String host = domainManager.getSelectedHost();
             dispatcher
@@ -178,7 +256,8 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
             contextCallback
                     .onSuccess(
                             new RollbackContext(true, null, Collections.<String>emptyList(), patchManager.baseAddress(),
-                                    patchInfo));
+                                    patchInfo)
+                    );
         } else {
             final String host = domainManager.getSelectedHost();
             dispatcher
@@ -199,14 +278,14 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
     }
 
     public void biggerWindow() {
-        if (window != null) {
+        if (window != null && window.isAttached()) {
             window.setHeight(BIGGER_WINDOW_HEIGHT);
             window.center();
         }
     }
 
     public void normalWindow() {
-        if (window != null) {
+        if (window != null && window.isAttached()) {
             window.setHeight(NORMAL_WINDOW_HEIGHT);
             window.center();
         }
@@ -252,53 +331,5 @@ public class PatchManagerPresenter extends Presenter<PatchManagerPresenter.MyVie
         operation.get(CHILD_TYPE).set("server");
         operation.get(INCLUDE_RUNTIME).set(true);
         return operation;
-    }
-
-    @ProxyCodeSplit
-    @NameToken(NameTokens.PatchingPresenter)
-    @AccessControl(resources = {"/{selected.host}/core-service=patching"}, recursive = false)
-    public interface MyProxy extends Proxy<PatchManagerPresenter>, Place {}
-
-
-    public interface MyView extends View {
-
-        void setPresenter(PatchManagerPresenter presenter);
-
-        void update(Patches patches);
-    }
-
-
-    private abstract class GetRunningServersCallback implements AsyncCallback<DMRResponse> {
-
-        private final Callback<? extends CommonPatchContext, Throwable> contextCallback;
-
-        public GetRunningServersCallback(final Callback<? extends CommonPatchContext, Throwable> contextCallback) {
-            this.contextCallback = contextCallback;
-        }
-
-        @Override
-        public void onSuccess(DMRResponse result) {
-            ModelNode response = result.get();
-            List<String> runningServers = new LinkedList<String>();
-            if (!response.isFailure()) {
-                List<Property> servers = response.get(RESULT).asPropertyList();
-                for (Property server : servers) {
-                    String name = server.getName();
-                    ModelNode instance = server.getValue();
-                    String state = instance.get("server-state").asString();
-                    if ("running".equals(state)) {
-                        runningServers.add(name);
-                    }
-                }
-            }
-            onServers(runningServers);
-        }
-
-        @Override
-        public void onFailure(final Throwable caught) {
-            contextCallback.onFailure(caught);
-        }
-
-        protected abstract void onServers(List<String> runningServers);
     }
 }
