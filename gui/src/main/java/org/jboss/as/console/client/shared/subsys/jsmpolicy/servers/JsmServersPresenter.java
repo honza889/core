@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.jboss.as.console.client.Console;
-import org.jboss.as.console.client.core.message.Message;
 import org.jboss.as.console.client.domain.model.HostInformationStore;
 import org.jboss.as.console.client.domain.model.LoggingCallback;
 import org.jboss.as.console.client.domain.model.ServerInstance;
@@ -23,9 +22,6 @@ import org.jboss.as.console.client.domain.model.SimpleCallback;
 import org.jboss.as.console.client.domain.topology.HostInfo;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PolicyEntity;
-import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
-import org.jboss.as.console.client.widgets.forms.BeanMetaData;
 import org.jboss.as.console.spi.AccessControl;
 import org.jboss.as.console.spi.SubsystemExtension;
 import org.jboss.dmr.client.ModelDescriptionConstants;
@@ -35,7 +31,6 @@ import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.impl.DMRAction;
 import org.jboss.dmr.client.dispatch.impl.DMRResponse;
 
-import com.allen_sauer.gwt.log.client.Log;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
@@ -74,7 +69,6 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 
 	protected void onReset() {
         super.onReset();
-        Console.warning("JsmServersPresenter.onReset()");
         loadServerGroups();
         loadPolicyPossibleValues();
     }
@@ -88,10 +82,8 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
             public void onSuccess(DMRResponse response) {
                 String result = response.get().get(ModelDescriptionConstants.RESULT).asString();
                 if(result.equalsIgnoreCase("STANDALONE")){
-                    Console.warning("JsmServersPresenter.loadServerGroups()-standalone");
                     loadServerGroupsInStandalone();
                 }else{
-                    Console.warning("JsmServersPresenter.loadServerGroups()-domain");
                     loadServerGroupsInDomain();
                 }
             }
@@ -110,9 +102,6 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
                 String serverName = response.get().get(ModelDescriptionConstants.RESULT).asString();
-
-                Console.warning("loadServerGroupsInStandalone.success..."+serverName);
-
                 Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
 
                 JsmNode serverNode = new JsmNode(serverName, presenter);
@@ -132,7 +121,6 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         final JsmServersPresenter presenter = this;
         hostStore.loadHostsAndServerInstances(new SimpleCallback<List<HostInfo>>() {
             public void onSuccess(List<HostInfo> hosts) {
-                Console.warning("loadServerGroupsInDomain.success..."+hosts.size());
                 try {
                     Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
                     for (HostInfo host : hosts) {

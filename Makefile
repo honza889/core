@@ -1,5 +1,5 @@
 # Path to JBoss AS / EAP / Wildfly
-JBOSS_PATH = ../wildfly-8.0.0.CR1
+JBOSS_PATH = ../wildfly-8.0.1.Final-SNAPSHOT
 
 all: compile install domain
 
@@ -10,7 +10,7 @@ install:
 	cp build/app/target/jboss-as-console-2.3.0-SNAPSHOT-resources.jar $(JBOSS_PATH)/modules/system/layers/base/org/jboss/as/console/main/
 	cp module.xml $(JBOSS_PATH)/modules/system/layers/base/org/jboss/as/console/main/
 
-run:
+standalone:
 	$(JBOSS_PATH)/bin/standalone.sh
 
 domain:
