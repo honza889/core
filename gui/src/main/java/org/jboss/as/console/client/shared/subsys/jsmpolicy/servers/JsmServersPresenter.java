@@ -262,7 +262,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
             public void onSuccess(DMRResponse response) {
 
                 ModelNode result = response.get().get(ModelDescriptionConstants.RESULT);
-                if(result.getType()!=ModelType.LIST) return;
+                if(result==null || result.getType()!=ModelType.LIST) return;
                 List<ModelNode> children = result.asList();
 
                 policyPossibleValues.clear();

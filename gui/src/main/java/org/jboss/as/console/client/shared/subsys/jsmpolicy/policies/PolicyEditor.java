@@ -142,7 +142,7 @@ public class PolicyEditor {
 
         @Override
         public String getValue() {
-            return textArea.getValue().replace("\n", "\\n"); // backslashing before saving
+            return textArea.getValue().replace("\n", "\\n").replace("\"", "\\\""); // backslashing before saving
         }
 
         @Override

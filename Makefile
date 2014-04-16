@@ -1,7 +1,7 @@
 # Path to JBoss AS / EAP / Wildfly
 JBOSS_PATH = ../wildfly-8.0.1.Final-SNAPSHOT
 
-all: compile install domain
+all: compile install
 
 compile:
 	mvn -Pdev -Dmaven.test.skip=true install
