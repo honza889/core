@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.jboss.as.console.client.Console;
 import org.jboss.as.console.client.domain.model.SimpleCallback;
-import org.jboss.as.console.client.shared.state.DomainEntityManager;
 import org.jboss.as.console.client.shared.subsys.Baseadress;
 import org.jboss.as.console.client.shared.subsys.RevealStrategy;
 import org.jboss.as.console.client.widgets.forms.ApplicationMetaData;
@@ -46,7 +45,6 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
     private final DispatchAsync dispatcher;
     private final EntityAdapter<PolicyEntity> adapter;
     private final BeanMetaData beanMetaData;
-    private final DomainEntityManager domainManager;
 
     private DefaultWindow window;
 
@@ -65,15 +63,13 @@ public class PoliciesPresenter extends Presenter<PoliciesPresenter.MyView, Polic
 
     @Inject
     public PoliciesPresenter(EventBus eventBus, MyView view, MyProxy proxy, PlaceManager placeManager,
-            DispatchAsync dispatcher, RevealStrategy revealStrategy, ApplicationMetaData metaData,
-            DomainEntityManager domainManager) {
+            DispatchAsync dispatcher, RevealStrategy revealStrategy, ApplicationMetaData metaData) {
 
         super(eventBus, view, proxy);
 
         this.placeManager = placeManager;
         this.revealStrategy = revealStrategy;
         this.dispatcher = dispatcher;
-        this.domainManager = domainManager;
         this.beanMetaData = metaData.getBeanMetaData(PolicyEntity.class);
         this.adapter = new EntityAdapter<PolicyEntity>(PolicyEntity.class, metaData);
     }

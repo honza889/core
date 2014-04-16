@@ -15,8 +15,7 @@ public class PoliciesView extends DisposableViewImpl implements PoliciesPresente
 
     private PoliciesPresenter presenter;
     private PagedView panel;
-    private PolicyEditor sessionEditor;
-    private List<PolicyEntity> sessions;
+    private PolicyEditor policyEditor;
 
     @Override
     public Widget createWidget() {
@@ -29,9 +28,9 @@ public class PoliciesView extends DisposableViewImpl implements PoliciesPresente
 
         panel = new PagedView();
 
-        sessionEditor = new PolicyEditor(presenter);
+        policyEditor = new PolicyEditor(presenter);
 
-        panel.addPage(Console.CONSTANTS.common_label_back(), sessionEditor.asWidget());
+        panel.addPage(Console.CONSTANTS.common_label_back(), policyEditor.asWidget());
         panel.showPage(0);
 
         Widget panelWidget = panel.asWidget();
@@ -48,7 +47,6 @@ public class PoliciesView extends DisposableViewImpl implements PoliciesPresente
     }
 
     public void updateFrom(List<PolicyEntity> list) {
-        this.sessions = list;
-        sessionEditor.updateFrom(list);
+        policyEditor.updateFrom(list);
     }
 }

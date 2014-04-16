@@ -1,5 +1,6 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy.server;
 
+import com.allen_sauer.gwt.log.client.Log;
 import com.google.inject.Inject;
 import com.google.web.bindery.event.shared.EventBus;
 import com.gwtplatform.mvp.client.Presenter;
@@ -40,25 +41,23 @@ public class DetailPresenter extends Presenter<DetailPresenter.MyView,
     public interface MyView extends SuspendableView
     {
         void setPresenter(DetailPresenter presenter);
-        void setPolicyFile(String policyFile);
+        void setPolicyFile(String policyFileName, String policyFileContent);
     }
 
     private final DispatchAsync dispatcher;
     private final RevealStrategy revealStrategy;
-    private final BootstrapContext bootstrap;
     private final DomainEntityManager domainManager;
 
 
     @Inject
     public DetailPresenter(final EventBus eventBus, final MyView view,
-                                final MyProxy proxy, final DispatchAsync dispatcher,
-                                final RevealStrategy revealStrategy, final BootstrapContext bootstrap,
-                                final DomainEntityManager domainManager)
+                           final MyProxy proxy, final DispatchAsync dispatcher,
+                           final RevealStrategy revealStrategy,
+                           final DomainEntityManager domainManager)
     {
         super(eventBus, view, proxy);
         this.dispatcher = dispatcher;
         this.revealStrategy = revealStrategy;
-        this.bootstrap = bootstrap;
         this.domainManager = domainManager;
     }
 
@@ -92,65 +91,68 @@ public class DetailPresenter extends Presenter<DetailPresenter.MyView,
 
     public void refresh()
     {
-        String serverName = domainManager.getSelectedServer();
+        final String serverName = domainManager.getSelectedServer();
         if(serverName.equals(NOT_SET)) return;
 
         ModelNode operation = new ModelNode();
         operation.get(ADDRESS).set(RuntimeBaseAddress.get());
-        operation.get(ADDRESS).add("subsystem", "jsmpolicy");
-        operation.get(ADDRESS).add("server", serverName);
         operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
-        operation.get(NAME).set("policy");
+        operation.get(NAME).set("server-state");
 
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
-                ModelNode resultServer = response.get().get(ModelDescriptionConstants.RESULT);
-
-                if(resultServer.getType()==ModelType.UNDEFINED){
+                String resultState = response.get().get(ModelDescriptionConstants.RESULT).asString();
+                if(resultState.equals("running")){
 
                     ModelNode operation = new ModelNode();
                     operation.get(ADDRESS).set(RuntimeBaseAddress.get());
+                    operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+                    operation.get(ADDRESS).add("server", serverName);
                     operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
-                    operation.get(NAME).set("server-state");
+                    operation.get(NAME).set("policy");
 
                     dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
                         public void onSuccess(DMRResponse response) {
-                            String resultState = response.get().get(ModelDescriptionConstants.RESULT).asString();
-                            if(resultState.equals("running")){
-                                getView().setPolicyFile("(Security manager not used)");
-                            }else{
-                                getView().setPolicyFile("(Server is "+resultState+")");
+
+                            ModelNode resultServer = response.get().get(ModelDescriptionConstants.RESULT);
+                            if(resultServer.getType()==ModelType.UNDEFINED){
+                                getView().setPolicyFile("(Security policy not used)", "");
+                                return;
                             }
+                            final String policyName = resultServer.asString();
+
+                            ModelNode operation = new ModelNode();
+                            operation.get(ADDRESS).set(RuntimeBaseAddress.get());
+                            operation.get(ADDRESS).add("subsystem", "jsmpolicy");
+                            operation.get(ADDRESS).add("policy", policyName);
+                            operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
+                            operation.get(NAME).set("file");
+
+                            dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
+                                public void onSuccess(DMRResponse response) {
+                                    ModelNode resultPolicy = response.get().get(ModelDescriptionConstants.RESULT);
+                                    getView().setPolicyFile(policyName, resultPolicy.asString());
+                                }
+                                public void onFailure(Throwable caught) {
+                                    Log.error("Failure when loading node of used policy", caught);
+                                    Console.error("Failure when loading node of used policy", caught.getLocalizedMessage());
+                                    getView().setPolicyFile(policyName, "(Used security policy not found)");
+                                }
+                            });
                         }
                         public void onFailure(Throwable caught) {
-                            super.onFailure(caught);
-                            Console.error("Failure when detecting state of server", caught.getLocalizedMessage());
+                            getView().setPolicyFile("(Security policy not used)", "");
                         }
                     });
-                    return;
+
+                }else{
+                    getView().setPolicyFile("(Server is "+resultState+")", "");
                 }
-
-                ModelNode operation = new ModelNode();
-                operation.get(ADDRESS).set(RuntimeBaseAddress.get());
-                operation.get(ADDRESS).add("subsystem", "jsmpolicy");
-                operation.get(ADDRESS).add("policy", resultServer.asString());
-                operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
-                operation.get(NAME).set("file");
-
-                dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
-                    public void onSuccess(DMRResponse response) {
-                        ModelNode resultPolicy = response.get().get(ModelDescriptionConstants.RESULT);
-                        getView().setPolicyFile(resultPolicy.asString());
-                    }
-                    public void onFailure(Throwable caught) {
-                        super.onFailure(caught);
-                        Console.error("Failure when loading policy node", caught.getLocalizedMessage());
-                    }
-                });
             }
             public void onFailure(Throwable caught) {
-                super.onFailure(caught);
-                Console.error("Failure when loading server node", caught.getLocalizedMessage());
+                Log.error("Failure when detecting state of server", caught);
+                Console.error("Failure when detecting state of server", caught.getLocalizedMessage());
+                getView().setPolicyFile("(Failure when detecting state of server)", "");
             }
         });
     }

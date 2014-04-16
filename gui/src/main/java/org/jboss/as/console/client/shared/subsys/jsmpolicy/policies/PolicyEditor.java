@@ -146,11 +146,6 @@ public class PolicyEditor {
         }
 
         @Override
-        public boolean validate(String value) {
-            return true;
-        }
-
-        @Override
         public String asString() { // showed in PlainFormView
             return textArea.getValue();
         }
