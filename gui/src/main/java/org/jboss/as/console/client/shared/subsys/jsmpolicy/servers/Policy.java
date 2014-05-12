@@ -1,11 +1,11 @@
 package org.jboss.as.console.client.shared.subsys.jsmpolicy.servers;
 
-public class JsmPolicy {
+public class Policy {
 
     String name;
     String file;
 
-    public JsmPolicy(String name, String file){
+    public Policy(String name, String file){
         this.name = name;
         this.file = file;
     }

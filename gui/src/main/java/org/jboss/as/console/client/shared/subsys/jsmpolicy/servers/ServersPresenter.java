@@ -40,7 +40,7 @@ import com.gwtplatform.mvp.client.annotations.ProxyCodeSplit;
 import com.gwtplatform.mvp.client.proxy.Place;
 import com.gwtplatform.mvp.client.proxy.Proxy;
 
-public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, JsmServersPresenter.MyProxy> {
+public class ServersPresenter extends Presenter<ServersPresenter.MyView, ServersPresenter.MyProxy> {
 
 	private RevealStrategy revealStrategy;
 	private HostInformationStore hostStore;
@@ -52,15 +52,15 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
             "{selected.profile}/subsystem=jsmpolicy"
     })
 	@SubsystemExtension(name = "Servers", group = "JSM Policy", key = "jsmpolicy")
-	public interface MyProxy extends Proxy<JsmServersPresenter>, Place {}
+	public interface MyProxy extends Proxy<ServersPresenter>, Place {}
 	public interface MyView extends View {
-        void setServerGroups(Map<String,JsmNode> serverGroups);
+        void setServerGroups(Map<String,Node> serverGroups);
         void refresh();
-        List<JsmPolicy> getPolicyPossibleValues();
+        List<Policy> getPolicyPossibleValues();
 	}
 
 	@Inject
-	public JsmServersPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, DispatchAsync dispatcher) {
+	public ServersPresenter(EventBus eventBus, MyView view, MyProxy proxy, RevealStrategy revealStrategy, HostInformationStore hostStore, DispatchAsync dispatcher) {
 		super(eventBus, view, proxy);
 		this.revealStrategy = revealStrategy;
 		this.hostStore = hostStore;
@@ -94,7 +94,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 	}
 
 	private void loadServerGroupsInStandalone() {
-	    final JsmServersPresenter presenter = this;
+	    final ServersPresenter presenter = this;
 	    ModelNode operation = new ModelNode();
         operation.get(ADDRESS).set(Baseadress.get());
         operation.get(OP).set(READ_ATTRIBUTE_OPERATION);
@@ -102,9 +102,9 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         dispatcher.execute(new DMRAction(operation), new LoggingCallback<DMRResponse>() {
             public void onSuccess(DMRResponse response) {
                 String serverName = response.get().get(ModelDescriptionConstants.RESULT).asString();
-                Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
+                Map<String, Node> serverGroups = new HashMap<String, Node>();
 
-                JsmNode serverNode = new JsmNode(serverName, presenter);
+                Node serverNode = new Node(serverName, presenter);
                 loadServerPolicy(serverNode);
                 serverGroups.put(serverName, serverNode);
 
@@ -118,22 +118,22 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 
     private void loadServerGroupsInDomain() {
 
-        final JsmServersPresenter presenter = this;
+        final ServersPresenter presenter = this;
         hostStore.loadHostsAndServerInstances(new SimpleCallback<List<HostInfo>>() {
             public void onSuccess(List<HostInfo> hosts) {
                 try {
-                    Map<String, JsmNode> serverGroups = new HashMap<String, JsmNode>();
+                    Map<String, Node> serverGroups = new HashMap<String, Node>();
                     for (HostInfo host : hosts) {
                         for (ServerInstance instance : host.getServerInstances()) {
                             String groupName = instance.getGroup();
                             String serverName = instance.getServer();
-                            JsmNode serverNode = new JsmNode(serverName, presenter);
+                            Node serverNode = new Node(serverName, presenter);
                             loadServerPolicy(serverNode);
 
                             if (serverGroups.containsKey(groupName)) {
                                 serverGroups.get(groupName).getNodes().add(serverNode);
                             } else {
-                                JsmNode groupNode = new JsmNode(groupName, presenter);
+                                Node groupNode = new Node(groupName, presenter);
                                 groupNode.getNodes().add(serverNode);
                                 serverGroups.put(groupName, groupNode);
                             }
@@ -150,7 +150,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
         });
 	}
 
-    private void loadServerPolicy(final JsmNode serverNode) {
+    private void loadServerPolicy(final Node serverNode) {
 
         ModelNode operation = new ModelNode();
         operation.get(ADDRESS).set(Baseadress.get());
@@ -250,7 +250,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
 
 	public void loadPolicyPossibleValues(){
 
-	    final List<JsmPolicy> policyPossibleValues = getView().getPolicyPossibleValues();
+	    final List<Policy> policyPossibleValues = getView().getPolicyPossibleValues();
 
 	    ModelNode operation = new ModelNode();
 	    operation.get(ADDRESS).set(Baseadress.get());
@@ -266,7 +266,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                 List<ModelNode> children = result.asList();
 
                 policyPossibleValues.clear();
-                policyPossibleValues.add(new JsmPolicy(null,null));
+                policyPossibleValues.add(new Policy(null,null));
 
                 for(final ModelNode child : children){
 
@@ -281,7 +281,7 @@ public class JsmServersPresenter extends Presenter<JsmServersPresenter.MyView, J
                         public void onSuccess(DMRResponse response) {
 
                             String file = response.get().get(ModelDescriptionConstants.RESULT).asString();
-                            policyPossibleValues.add(new JsmPolicy(child.asString(), file));
+                            policyPossibleValues.add(new Policy(child.asString(), file));
 
                         }
                     });

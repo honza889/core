@@ -148,7 +148,7 @@ import org.jboss.dmr.client.dispatch.DispatchAsync;
 import org.jboss.dmr.client.dispatch.HandlerMapping;
 import org.jboss.dmr.client.dispatch.impl.DMRHandler;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.server.DetailPresenter;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.ServersPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesPresenter;
 
 /**
@@ -369,7 +369,7 @@ public interface CoreUI {
 
 
     // JSM Policy
-    AsyncProvider<JsmServersPresenter> getJsmServersPresenter();
+    AsyncProvider<ServersPresenter> getJsmServersPresenter();
     AsyncProvider<PoliciesPresenter> getJsmPoliciesPresenter();
     AsyncProvider<DetailPresenter> getDetailPresenter();
 

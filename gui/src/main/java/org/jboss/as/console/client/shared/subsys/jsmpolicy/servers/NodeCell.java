@@ -15,7 +15,7 @@ import com.google.gwt.safehtml.client.SafeHtmlTemplates;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 
-public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
+public class NodeCell extends AbstractInputCell<Node, Node> {
 
     interface Template extends SafeHtmlTemplates {
       @Template("<option value=\"{0}\">{1}</option>")
@@ -29,22 +29,22 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
 
     private HashMap<String, Integer> indexForOption = new HashMap<String, Integer>();
 
-    private final List<JsmPolicy> options;
+    private final List<Policy> options;
 
-    public JsmNodeCell(List<JsmPolicy> options) {
+    public NodeCell(List<Policy> options) {
       super(BrowserEvents.CHANGE);
       if (template == null) {
         template = GWT.create(Template.class);
       }
-      this.options = new ArrayList<JsmPolicy>(options);
+      this.options = new ArrayList<Policy>(options);
       int index = 0;
-      for (JsmPolicy option : options) {
+      for (Policy option : options) {
         indexForOption.put(option.getName(), index++);
       }
     }
 
-    public void onBrowserEvent(Context context, Element parent, JsmNode value,
-        NativeEvent event, ValueUpdater<JsmNode> valueUpdater) {
+    public void onBrowserEvent(Context context, Element parent, Node value,
+        NativeEvent event, ValueUpdater<Node> valueUpdater) {
       super.onBrowserEvent(context, parent, value, event, valueUpdater);
       String type = event.getType();
       if (BrowserEvents.CHANGE.equals(type)) {
@@ -61,10 +61,10 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       }
     }
 
-    public void render(Context context, JsmNode value, SafeHtmlBuilder sb) {
+    public void render(Context context, Node value, SafeHtmlBuilder sb) {
 
       Object key = context.getKey();
-      JsmNode viewData = getViewData(key);
+      Node viewData = getViewData(key);
       if (viewData != null && viewData.equals(value)) {
         clearViewData(key);
         viewData = null;
@@ -77,7 +77,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       int selectedIndex = getSelectedIndex(viewData == null ? value : viewData);
       sb.appendHtmlConstant("<select tabindex=\"-1\" style=\"width:400px\">");
       int index = 0;
-      for (JsmPolicy option : options) {
+      for (Policy option : options) {
           String optionName = option.getName() == null ? "none" : option.getName();
           String optionValue = option.getName() == null ? "" : option.getName();
           if (index++ == selectedIndex) {
@@ -89,7 +89,7 @@ public class JsmNodeCell extends AbstractInputCell<JsmNode, JsmNode> {
       sb.appendHtmlConstant("</select>");
     }
 
-    private int getSelectedIndex(JsmNode value) {
+    private int getSelectedIndex(Node value) {
       Integer index = indexForOption.get(value.getPolicy());
       return (index == null) ? -1 : index.intValue();
     }

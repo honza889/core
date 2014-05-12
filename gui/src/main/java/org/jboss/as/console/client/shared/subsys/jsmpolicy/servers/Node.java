@@ -3,13 +3,13 @@ package org.jboss.as.console.client.shared.subsys.jsmpolicy.servers;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JsmNode {
+public class Node {
 	String name;
 	String policy = "init";
-	List<JsmNode> nodes = new ArrayList<JsmNode>();
-	JsmServersPresenter presenter;
+	List<Node> nodes = new ArrayList<Node>();
+	ServersPresenter presenter;
 
-	public JsmNode(String name, JsmServersPresenter presenter){
+	public Node(String name, ServersPresenter presenter){
 		this.name = name;
 		this.presenter = presenter;
 	}
@@ -18,7 +18,7 @@ public class JsmNode {
 		return name;
 	}
 
-	public List<JsmNode> getNodes(){
+	public List<Node> getNodes(){
 		return nodes;
 	}
 
@@ -26,9 +26,9 @@ public class JsmNode {
 	    if(nodes.isEmpty()){ // server (empty groups are not here)
 	        return this.policy;
 	    }else{ // group
-	        JsmNode first = nodes.get(0);
+	        Node first = nodes.get(0);
 
-	        for(JsmNode subnode : nodes){
+	        for(Node subnode : nodes){
 	            if(!subnode.policy.equals(first.policy)){
 	                return "";
 	            }
@@ -47,7 +47,7 @@ public class JsmNode {
 	    if(nodes.isEmpty()){ // server
 	        presenter.setServerPolicy(name, policy);
 	    }else{ // group
-	        for(JsmNode subnode : nodes){
+	        for(Node subnode : nodes){
 	            subnode.setPolicy(policy);
 	        }
 	    }

@@ -11,11 +11,11 @@ import com.google.gwt.user.cellview.client.CellTree;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
-public class JsmView extends DisposableViewImpl implements JsmServersPresenter.MyView {
+public class ServersView extends DisposableViewImpl implements ServersPresenter.MyView {
 
 	private VerticalPanel container;
-	private Map<String,JsmNode> serverGroups;
-	private final List<JsmPolicy> policyPossibleValues = new ArrayList<JsmPolicy>();
+	private Map<String,Node> serverGroups;
+	private final List<Policy> policyPossibleValues = new ArrayList<Policy>();
 
     public Widget createWidget() {
 
@@ -31,20 +31,20 @@ public class JsmView extends DisposableViewImpl implements JsmServersPresenter.M
 		return panel.build();
     }
 
-	public void setServerGroups(Map<String,JsmNode> serverGroups) {
+	public void setServerGroups(Map<String,Node> serverGroups) {
 
 		this.serverGroups = serverGroups;
 
-	    JsmTreeViewModel model = new JsmTreeViewModel(serverGroups, policyPossibleValues);
+	    ServersTreeViewModel model = new ServersTreeViewModel(serverGroups, policyPossibleValues);
 		CellTree tree = new CellTree(model,"Domain");
-		JsmTreeViewModel.runFinish();
+		ServersTreeViewModel.runFinish();
 
 		container.clear();
 		container.add(tree);
 
 	}
 
-	public List<JsmPolicy> getPolicyPossibleValues(){
+	public List<Policy> getPolicyPossibleValues(){
 	    return policyPossibleValues;
 	}
 

@@ -7,24 +7,24 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.TreeViewModel;
 
-public class JsmTreeViewModel implements TreeViewModel {
+public class ServersTreeViewModel implements TreeViewModel {
 
-    Map<String, JsmNode> serverGroups;
-    List<JsmPolicy> policyPossibleValues;
-    ListDataProvider<JsmNode> dataProvider = new ListDataProvider<JsmNode>();
+    Map<String, Node> serverGroups;
+    List<Policy> policyPossibleValues;
+    ListDataProvider<Node> dataProvider = new ListDataProvider<Node>();
     private static Command finishCmd = null;
 
-    public JsmTreeViewModel(Map<String, JsmNode> serverGroups, List<JsmPolicy> policyPossibleValues) {
+    public ServersTreeViewModel(Map<String, Node> serverGroups, List<Policy> policyPossibleValues) {
         this.serverGroups = serverGroups;
         this.policyPossibleValues = policyPossibleValues;
     }
 
     public <T> NodeInfo<?> getNodeInfo(T value) {
 
-        final ListDataProvider<JsmNode> dataProvider = new ListDataProvider<JsmNode>();
+        final ListDataProvider<Node> dataProvider = new ListDataProvider<Node>();
 
-        if (value instanceof JsmNode) {
-            for (JsmNode server : ((JsmNode) value).getNodes()) {
+        if (value instanceof Node) {
+            for (Node server : ((Node) value).getNodes()) {
                 dataProvider.getList().add(server);
             }
         } else {
@@ -32,7 +32,7 @@ public class JsmTreeViewModel implements TreeViewModel {
                 public void execute() {
                     if(serverGroups!=null){
                         dataProvider.getList().clear();
-                        for (JsmNode group : serverGroups.values()) {
+                        for (Node group : serverGroups.values()) {
                             dataProvider.getList().add(group);
                         }
                     }
@@ -40,19 +40,19 @@ public class JsmTreeViewModel implements TreeViewModel {
             });
         }
 
-        return new DefaultNodeInfo<JsmNode>(dataProvider, new JsmNodeCell(policyPossibleValues));
+        return new DefaultNodeInfo<Node>(dataProvider, new NodeCell(policyPossibleValues));
     }
 
     public boolean isLeaf(Object value) {
-        return (value instanceof JsmNode) && ((JsmNode) value).getNodes().isEmpty();
+        return (value instanceof Node) && ((Node) value).getNodes().isEmpty();
     }
 
     public static void setFinish(Command finishCmd) {
-        JsmTreeViewModel.finishCmd = finishCmd;
+        ServersTreeViewModel.finishCmd = finishCmd;
     }
 
     public static void runFinish() {
-        Command finishCmd = JsmTreeViewModel.finishCmd;
+        Command finishCmd = ServersTreeViewModel.finishCmd;
         if (finishCmd != null) finishCmd.execute();
     }
 

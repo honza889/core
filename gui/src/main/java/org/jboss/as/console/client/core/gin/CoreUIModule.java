@@ -248,8 +248,8 @@ import org.jboss.dmr.client.dispatch.impl.DispatchAsyncImpl;
 import org.jboss.dmr.client.dispatch.impl.HandlerRegistry;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.server.DetailPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.server.DetailView;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmServersPresenter;
-import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.JsmView;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.ServersPresenter;
+import org.jboss.as.console.client.shared.subsys.jsmpolicy.servers.ServersView;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesPresenter;
 import org.jboss.as.console.client.shared.subsys.jsmpolicy.policies.PoliciesView;
 
@@ -749,10 +749,10 @@ public class CoreUIModule extends AbstractPresenterModule {
                         DialogPresenter.MyProxy.class);
 
         // JSM Policy
-        bindPresenter(JsmServersPresenter.class,
-                JsmServersPresenter.MyView.class,
-                JsmView.class,
-                JsmServersPresenter.MyProxy.class);
+        bindPresenter(ServersPresenter.class,
+                ServersPresenter.MyView.class,
+                ServersView.class,
+                ServersPresenter.MyProxy.class);
 
         bindPresenter(PoliciesPresenter.class,
                 PoliciesPresenter.MyView.class,
